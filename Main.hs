@@ -13,9 +13,14 @@ import Apecs.Gloss
 import Linear
 import System.Exit
 
+import Game.Data.TiledMap
+import Game.Data.FPS
+
 newtype Position =
   Position (V2 Float)
   deriving (Show)
+
+newtype Position = Position (V2 Float) deriving (Show)
 
 instance Component Position where
   type Storage Position = Map Position
