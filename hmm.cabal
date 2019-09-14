@@ -11,4 +11,6 @@ executable hmm
     apecs-gloss,
     base,
     gloss,
+    linear,
+    random,
   main-is: Main.hs
