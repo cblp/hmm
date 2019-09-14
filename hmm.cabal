@@ -13,4 +13,6 @@ executable hmm
     gloss,
     linear,
     random,
+    vector,
+    aeson-tiled
   main-is: Main.hs
