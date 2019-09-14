@@ -5,8 +5,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 
-
-module World where
+module Game.World where
 
 import Apecs
 import Apecs.Gloss

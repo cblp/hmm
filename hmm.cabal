@@ -1,11 +1,28 @@
-cabal-version: 2.2
+cabal-version: 2.4
 
 name: hmm
-version: 0
+version: 0.1.0
 
 build-type: Simple
 
-executable hmm
+library
+  default-language: Haskell2010
+  hs-source-dirs: src
+  exposed-modules:
+    Game.World
+    Game.Data.TiledMap
+    Game.Data.FPS
+  build-depends:
+    apecs,
+    apecs-gloss,
+    base,
+    gloss,
+    linear,
+    random,
+    vector,
+    aeson-tiled,
+
+executable game
   build-depends:
     apecs,
     apecs-gloss,
@@ -32,18 +49,7 @@ executable hmm
   default-language: Haskell2010
   hs-source-dirs: game
   main-is: Main.hs
-library
-  hs-source-dirs: src
-  exposed-modules: World
-  build-depends: 
-    apecs,
-    apecs-gloss,
-    base,
-    gloss,
-    linear,
-    random,
-    vector,
-    aeson-tiled,
+
 
 executable game-server
   build-depends:
@@ -67,8 +73,6 @@ library game-network
     network,
   ghc-options:
     -Wall
-    -threaded
-    -rtsopts
   default-language: Haskell2010
   hs-source-dirs:
     game-network

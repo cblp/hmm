@@ -12,7 +12,7 @@ import Apecs
 import Apecs.Gloss
 import Linear
 import System.Exit
-import World
+import Game.World
 
 -- type Kinetic = (Position, Velocity)
 main :: IO ()
