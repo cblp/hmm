@@ -33,17 +33,18 @@ main
 sqrt2 :: Float
 sqrt2 = sqrt 2
 
+
 initialize :: System' ()
 initialize = do
   _enemy1 <-
     newEntity
-      (Machine, Position (V2 50 50), Velocity 0, Direction $ V2 (1/sqrt2) (1/sqrt2), Skin red)
+      (Machine, Position (V2 50 50), Velocity 0, radiusDirection 1 (pi/4), Skin red)
   _enemy2 <-
     newEntity
       ( Machine
       , Position (V2 (-50) (-50))
       , Velocity 0
-      , Direction $ V2 1 0
+      , radiusDirection 1 (pi/2)
       , Skin red)
   _player <-
     newEntity
@@ -52,7 +53,7 @@ initialize = do
       , Position 0
       , Velocity 0
       , Accelerator False
-      , Direction $ V2 0 1
+      , radiusDirection 1 pi
       , Skin white)
   pure ()
 
