@@ -10,15 +10,16 @@ library
   hs-source-dirs: src
   exposed-modules:
     Game
+    Game.Config
     Game.Env
     Game.World
     Game.Level
     Game.Image
-    Game.Data.TiledMap
-    Game.Data.Assets
-    Game.Data
     Game.FPS
     Game.Animation
+    Game.Data
+    Game.Data.TiledMap
+    Game.Data.Assets
   build-depends:
     text,
     apecs,
@@ -33,6 +34,7 @@ library
     co-log,
     text,
     mtl,
+    lens,
     natural-transformation,
 
 executable hmm
@@ -48,6 +50,8 @@ executable hmm
     co-log,
     text,
     mtl,
+    optparse-applicative,
+    lens,
     natural-transformation,
     hmm
   ghc-options:
@@ -66,6 +70,7 @@ executable hmm
   default-language: Haskell2010
   hs-source-dirs: game
   main-is: Main.hs
+  other-modules: CLI
 
 executable game-server
   build-depends:

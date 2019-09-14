@@ -5,16 +5,17 @@
 
 module Game.Env
   ( Env(..)
+  , newEnv
   ) where
 
 import Data.Text (Text)
 import Control.Monad.IO.Class (MonadIO)
-import Control.Concurrent (MVar, newEmptyMVar)
--- import Data.IORef (IORef)
+import Data.IORef (IORef, newIORef)
 import Colog (HasLog, LogAction, Message, cmapM, defaultFieldMap,
               fmtRichMessageDefault, getLogAction, liftLogIO, logTextStdout,
               setLogAction, upgradeMessageAction)
 
+import Game.Config (Config)
 import Game.Level (Level)
 
 -- | Global environment stores read-only information and
@@ -24,7 +25,9 @@ data Env m = Env
   { -- | A `LogAction` to be used by the `co-log` package.
     logger :: !(LogAction m Message)
     -- | Reference to a current level.
-  , level :: !(MVar Level)
+  , level :: !(IORef Level)
+    -- | Game configuration options.
+  , config :: !Config
   }
 
 instance HasLog (Env m) Message m where
@@ -36,12 +39,17 @@ instance HasLog (Env m) Message m where
 
 -- | Creates a record that matches the `Env` type our
 -- application requires by filling in necessary fields.
-mkEnv :: MonadIO m => LogAction IO Text -> IO (Env m)
-mkEnv logTextFile = do
+newEnv
+  :: MonadIO m
+  => LogAction IO Text
+  -> Config
+  -> Level
+  -> IO (Env m)
+newEnv logTextFile config lvl = do
   let
     logText = logTextStdout <> logTextFile
     logRich = cmapM fmtRichMessageDefault logText
     logFull = upgradeMessageAction defaultFieldMap logRich
     logger  = liftLogIO logFull
-  level <- newEmptyMVar
+  level <- newIORef lvl
   return Env{..}
