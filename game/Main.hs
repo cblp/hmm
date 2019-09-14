@@ -9,9 +9,9 @@
 -- import Graphics.Gloss.Data.Bitmap
 import Apecs
 import Apecs.Gloss
+import Game.World
 import Linear
 import System.Exit
-import Game.World
 
 -- type Kinetic = (Position, Velocity)
 main :: IO ()
@@ -72,14 +72,14 @@ machineSize = 100
 
 draw :: System' Picture
 draw = do
-  player <-
+  machines <-
     foldDraw $ \(Machine, pos, Direction (V2 dx dy), skin) ->
       translatePos pos $
       drawMachine
         skin
         (circle (machineSize / 2) <>
          scale' (machineSize / 2) (line [(0, 0), (dx, dy)]))
-  pure player
+  pure machines
 
 scale' :: Float -> Picture -> Picture
 scale' factor = scale factor factor
@@ -97,6 +97,7 @@ handleEvent =
 step :: Float -> System' ()
 step dT = do
   incrTime dT
+  cameraFollowsThePlayer
   cmap $ \(Player, Velocity v, Direction d, AcceleratePedal a, BrakePedal b) ->
     if
       | a && not b -> Velocity (v + acceleration * dT *^ d)
@@ -104,6 +105,9 @@ step dT = do
         let v' = v - brakeFriction * dT *^ normalize v
          in Velocity $ if dot v v' > 0 then v' else 0
       | otherwise -> Velocity v
+  cmap $ \(Velocity v) ->
+    let v' = v - terrainFriction * dT *^ normalize v
+     in Velocity $ if dot v v' > 0 then v' else 0
   cmap $ \(Position p, Velocity v) -> Position (p + dT *^ v)
 
 translatePos :: Position -> Picture -> Picture
@@ -115,8 +119,16 @@ drawMachine (Skin skin) = color skin
 incrTime :: Float -> System' ()
 incrTime dT = modify global $ \(Time t) -> Time (t + dT)
 
+cameraFollowsThePlayer :: System' ()
+cameraFollowsThePlayer =
+  cmapM_ $ \(Player, Position p) ->
+    modify global $ \(Camera _ s) -> Camera p s
+
 acceleration :: Float
 acceleration = 100
 
 brakeFriction :: Float
 brakeFriction = 200
+
+terrainFriction :: Float
+terrainFriction = 50

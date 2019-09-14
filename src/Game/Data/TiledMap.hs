@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Game.Data.TiledMap
   ( TiledMap(..)
   -- , load
