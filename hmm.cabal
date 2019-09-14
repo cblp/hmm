@@ -10,9 +10,11 @@ library
   hs-source-dirs: src
   exposed-modules:
     Game.World
+    Game.Image
     Game.Data.TiledMap
     Game.Data.FPS
   build-depends:
+    text,
     apecs,
     apecs-gloss,
     base,
@@ -23,7 +25,7 @@ library
     vector,
     aeson-tiled,
 
-executable game
+executable hmm
   build-depends:
     apecs,
     apecs-gloss,
@@ -51,7 +53,6 @@ executable game
   hs-source-dirs: game
   main-is: Main.hs
 
-
 executable game-server
   build-depends:
     base,
@@ -66,18 +67,3 @@ executable game-server
   main-is: Main.hs
   hs-source-dirs:
     game-server
-
-library game-network
-  build-depends:
-    base,
-    bytestring,
-    network,
-    serialise,
-  ghc-options:
-    -Wall
-  default-language: Haskell2010
-  hs-source-dirs:
-    game-network
-  exposed-modules:
-    Game.Network
-    Game.Message

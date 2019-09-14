@@ -74,7 +74,7 @@ instance Component Machine where
   type Storage Machine = Map Machine
 
 newtype Skin =
-  Skin Color
+  Skin Picture
   deriving (Show)
 
 instance Component Skin where
@@ -95,3 +95,6 @@ makeWorld
     ]
 
 type System' a = System World a
+
+radiusDirection :: Float -> Float -> Direction
+radiusDirection radius angle = Direction $ V2 (radius * (sin angle)) (radius * (cos angle))
