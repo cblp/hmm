@@ -46,6 +46,10 @@ data Machine = Machine deriving (Show)
 
 instance Component Machine where type Storage Machine = Map Machine
 
+newtype Skin = Skin Color deriving (Show)
+
+instance Component Skin where type Storage Skin = Map Skin
+
 makeWorld
   "World"
   [ ''Acceleration,
@@ -54,7 +58,8 @@ makeWorld
     ''Time,
     ''Player,
     ''Camera,
-    ''Machine
+    ''Machine,
+    ''Skin
     ]
 
 type System' a = System World a
@@ -76,7 +81,9 @@ main = do
 
 initialize :: System' ()
 initialize = do
-  _player <- newEntity (Player, Machine, Position 0, Velocity 0)
+  _player <- newEntity (Player, Machine, Position 0, Velocity 0, Skin white)
+  _enemy1 <- newEntity (Machine, Position (V2 50 50), Velocity 0, Skin red)
+  _enemy2 <- newEntity (Machine, Position (V2 (-50) (-50)), Velocity 0, Skin red)
   pure ()
 
 worldWidth, worldHeight :: Int
@@ -88,12 +95,12 @@ machineSize = 100
 
 draw :: System' Picture
 draw = do
-  player <-
-    foldDraw $ \(Machine, pos) ->
+  machines <-
+    foldDraw $ \(Machine, skin, pos) ->
       translatePos pos
-        $ color white
-            (circle (machineSize / 2) <> line [(0, 0), (0, machineSize / 2)])
-  pure player
+        $ drawMachine skin
+            (circle (machineSize / 2) <> line [(0,0), (0, machineSize / 2)])
+  pure $ machines
 
 handleEvent :: Event -> System' ()
 handleEvent = \case
@@ -120,6 +127,9 @@ step dT = do
 
 translatePos :: Position -> Picture -> Picture
 translatePos (Position (V2 x y)) = translate x y
+
+drawMachine :: Skin -> Picture -> Picture
+drawMachine (Skin skin) = color skin
 
 incrTime :: Float -> System' ()
 incrTime dT = modify global $ \(Time t) -> Time (t + dT)
