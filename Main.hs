@@ -106,11 +106,14 @@ main
       handleEvent
       step
 
+sqrt2 :: Float
+sqrt2 = sqrt 2
+
 initialize :: System' ()
 initialize = do
   _enemy1 <-
     newEntity
-      (Machine, Position (V2 50 50), Velocity 0, Direction $ V2 1 1, Skin red)
+      (Machine, Position (V2 50 50), Velocity 0, Direction $ V2 (1/sqrt2) (1/sqrt2), Skin red)
   _enemy2 <-
     newEntity
       ( Machine
