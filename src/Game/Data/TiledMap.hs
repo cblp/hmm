@@ -38,7 +38,7 @@ instance Show TiledMapLoadException where
 
 load :: TiledMapInfo -> IO TiledMap
 load info@TiledMapInfo{..} = do
-  tileset <- Image.loadi tilesetImage
+  tileset <- Image.loadInfo tilesetImage
   tiledmap <- loadTiledmap jsonPath
   let tiles = mkTiles $ either err id tiledmap
   return TiledMap{..}

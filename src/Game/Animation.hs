@@ -7,6 +7,7 @@ module Game.Animation
 
 import Graphics.Gloss (Picture)
 
+-- | Contains animation-related info.
 data Animation = Animation
   { pics :: [Picture]
   , start :: Float

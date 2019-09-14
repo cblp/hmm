@@ -7,7 +7,7 @@ module Game.Image
   ( Image(..)
   , ImageInfo(..)
   , load
-  , loadi
+  , loadInfo
   ) where
 
 import Data.Maybe (fromMaybe)
@@ -40,10 +40,10 @@ instance Show ImageLoadException where
 
 -- | Loads image using type given file path and type.
 load :: FilePath -> Image -> IO Picture
-load imagePath imageType = loadi ImageInfo{..}
+load imagePath imageType = loadInfo ImageInfo{..}
 
-loadi :: ImageInfo -> IO Picture
-loadi info@ImageInfo{..} = case imageType of
+loadInfo :: ImageInfo -> IO Picture
+loadInfo info@ImageInfo{..} = case imageType of
   BMP -> loadBMP imagePath
   PNG -> loadWith loadJuicyPNG
   JPG -> loadWith loadJuicyJPG
