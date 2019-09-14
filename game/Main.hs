@@ -43,7 +43,7 @@ initialize = do
       , radiusDirection 1 (pi/4)
       , Skin red
       )
- _enemy2 <-
+  _enemy2 <-
     newEntity
       ( Machine
       , Position (V2 (-50) (-50))
