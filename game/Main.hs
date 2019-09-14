@@ -52,12 +52,12 @@ initialize pic = do
     newEntity
       ( Player
       , Machine
-      , Position 0
-      , Velocity 0
-      , AcceleratePedal False
-      , BrakePedal False
+      , (Position 0, Velocity 0)
+      , (AcceleratePedal False, BrakePedal False)
       , radiusDirection 1 0
-      , Skin pic)
+      , Skin pic
+      , (SteerLeft False, SteerRight False)
+      )
   pure ()
 
 worldWidth, worldHeight :: Int
@@ -85,6 +85,10 @@ handleEvent =
       cmap $ \Player -> AcceleratePedal (state == Down)
     EventKey (SpecialKey KeyDown) state _ _ ->
       cmap $ \Player -> BrakePedal (state == Down)
+    EventKey (SpecialKey KeyLeft) state _ _ ->
+      cmap $ \Player -> SteerLeft (state == Down)
+    EventKey (SpecialKey KeyRight) state _ _ ->
+      cmap $ \Player -> SteerRight (state == Down)
     EventKey (SpecialKey KeyEsc) Down _ _ -> liftIO exitSuccess
     _ -> pure ()
 
@@ -92,6 +96,16 @@ step :: Float -> System' ()
 step dT = do
   incrTime dT
   cameraFollowsThePlayer
+  cmap $ \(Player, SteerLeft sl, SteerRight sr, Direction d, Velocity v) ->
+    let steering = dT * steerSpeed
+     in if
+          | sl && not sr ->
+            ( Direction $ rotateV2 (- steering) d,
+              Velocity $ rotateV2 (- steering) v
+              )
+          | sr && not sl ->
+            (Direction $ rotateV2 steering d, Velocity $ rotateV2 steering v)
+          | otherwise -> (Direction d, Velocity v)
   cmap
     $ \(Player, velocity@(Velocity v), Direction d, AcceleratePedal a, BrakePedal b) ->
       if
@@ -100,6 +114,9 @@ step dT = do
         | otherwise -> Velocity v
   cmap $ \v -> decelerate dT v terrainFriction
   cmap $ \(Position p, Velocity v) -> Position (p + dT *^ v)
+
+rotateV2 :: Floating a => a -> V2 a -> V2 a
+rotateV2 a (V2 x y) = V2 (x * cos a + y * sin a) (- x * sin a + y * cos a)
 
 decelerate :: Float -> Velocity -> Float -> Velocity
 decelerate dT (Velocity v) friction =
@@ -125,3 +142,6 @@ brakeFriction = 200
 
 terrainFriction :: Float
 terrainFriction = 50
+
+steerSpeed :: Float
+steerSpeed = 1
