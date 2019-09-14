@@ -10,7 +10,6 @@ module Game.World where
 import Apecs
 import Apecs.Gloss
 import Linear
-import System.Exit
 
 newtype Position =
   Position (V2 Float)
