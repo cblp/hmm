@@ -13,6 +13,7 @@ library
     Game.Data.TiledMap
     Game.Data.FPS
   build-depends:
+    text,
     apecs,
     apecs-gloss,
     base,
