@@ -68,7 +68,7 @@ worldHeight = 800
 
 draw :: System' Picture
 draw = do
-  player <-
+  machines <-
     foldDraw $ \(Machine, pos, Skin skin, Direction a, Velocity v) ->
       translatePos pos
       $ mconcat
@@ -76,8 +76,9 @@ draw = do
           , scale' 100 $ color red $ line' $ angle a
           , color blue $ line' v
           ]
-  pure player
+  pure machines
 
+line' :: V2 Float -> Picture
 line' (V2 x y) = line [(0, 0), (x, y)]
 
 scale' :: Float -> Picture -> Picture
