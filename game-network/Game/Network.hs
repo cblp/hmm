@@ -1,7 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Game.Network
-    ( createSocket
+    ( createServerSocket
+    , createClientSocket
+    , buildSockAddr
     , receiveMessage
     , sendMessage
     , Socket
@@ -21,13 +23,23 @@ import Game.Message (Message(..))
 chunkSize :: Int
 chunkSize = 4096
 
-createSocket :: Int -> IO Socket
-createSocket port = do
-    addrinfos <- getAddrInfo Nothing Nothing (Just $ show port)
-    let addr = head addrinfos
+createServerSocket :: Int -> IO Socket
+createServerSocket port = do
+    addr <- head <$> getAddrInfo Nothing Nothing (Just $ show port)
     sock <- socket (addrFamily addr) Datagram defaultProtocol
     bind sock (addrAddress addr)
     pure sock
+
+createClientSocket :: IO Socket
+createClientSocket = do
+    addr <- head <$> getAddrInfo Nothing Nothing (Just "8080")
+    sock <- socket (addrFamily addr) Datagram defaultProtocol
+    pure sock
+
+buildSockAddr :: String -> Int -> IO SockAddr
+buildSockAddr host port = do
+    addr <- head <$> getAddrInfo Nothing (Just host) (Just $ show port)
+    pure $ addrAddress addr
 
 parseMessage :: ByteString -> Message
 parseMessage = deserialise . fromStrict

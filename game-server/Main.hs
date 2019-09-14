@@ -28,7 +28,7 @@ mainLoop :: ServerSettings -> Server
 mainLoop settings = do
     liftIO $ putStrLn "GameJam server 0.0.1"
 
-    sock <- liftIO $ createSocket $ s_port settings
+    sock <- liftIO $ createServerSocket $ s_port settings
 
     acceptPlayers sock
 
