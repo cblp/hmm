@@ -54,7 +54,7 @@ initialize = do
       , Velocity 0
       , AcceleratePedal False
       , BrakePedal False
-      , radiusDirection 1 (pi/4)
+      , radiusDirection 1 (pi/2)
       , Skin white)
   pure ()
 
