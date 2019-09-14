@@ -76,7 +76,7 @@ worldHeight = 800
 draw :: System' Picture
 draw = do
   player <-
-    foldDraw $ \(Player, pos) -> translatePos pos $ color white $ circle 100
+    foldDraw $ \(Machine, pos) -> translatePos pos $ color white $ circle 100
   pure player
 
 handleEvent :: Event -> System' ()
