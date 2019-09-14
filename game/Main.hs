@@ -9,9 +9,9 @@
 -- import Graphics.Gloss.Data.Bitmap
 import Apecs
 import Apecs.Gloss
+import Game.World
 import Linear
 import System.Exit
-import Game.World
 
 -- type Kinetic = (Position, Velocity)
 main :: IO ()
@@ -96,6 +96,7 @@ handleEvent =
 step :: Float -> System' ()
 step dT = do
   incrTime dT
+  cameraFollowsThePlayer
   cmap $ \(Velocity v, Direction d, AcceleratePedal a, BrakePedal b) ->
     if
       | a && not b -> Velocity (v + acceleration * dT *^ d)
@@ -112,6 +113,11 @@ drawMachine (Skin skin) = color skin
 
 incrTime :: Float -> System' ()
 incrTime dT = modify global $ \(Time t) -> Time (t + dT)
+
+cameraFollowsThePlayer :: System' ()
+cameraFollowsThePlayer = do
+  cmapM_ $ \(Player, (Position v)) ->
+    modify global $ \(Camera _ s) -> Camera v s
 
 acceleration :: Float
 acceleration = 100
