@@ -25,10 +25,9 @@ newtype Velocity = Velocity (V2 Float) deriving (Show)
 
 instance Component Velocity where type Storage Velocity = Map Velocity
 
-newtype Acceleration = Acceleration (V2 Float) deriving (Show)
+newtype Accelerator = Accelerator Bool deriving (Show)
 
-instance Component Acceleration where
-  type Storage Acceleration = Map Acceleration
+instance Component Accelerator where type Storage Accelerator = Map Accelerator
 
 newtype Time = Time Float deriving (Show, Num)
 
@@ -48,13 +47,14 @@ instance Component Machine where type Storage Machine = Map Machine
 
 makeWorld
   "World"
-  [ ''Acceleration,
-    ''Position,
-    ''Velocity,
-    ''Time,
-    ''Player,
+  [ ''Accelerator,
     ''Camera,
-    ''Machine
+    ''Direction,
+    ''Machine,
+    ''Player,
+    ''Position,
+    ''Time,
+    ''Velocity
     ]
 
 type System' a = System World a
@@ -76,7 +76,15 @@ main = do
 
 initialize :: System' ()
 initialize = do
-  _player <- newEntity (Player, Machine, Position 0, Velocity 0)
+  _player <-
+    newEntity
+      ( Player,
+        Machine,
+        Position 0,
+        Velocity 0,
+        Accelerator False,
+        Direction $ V2 0 1
+        )
   pure ()
 
 worldWidth, worldHeight :: Int
@@ -97,8 +105,8 @@ draw = do
 
 handleEvent :: Event -> System' ()
 handleEvent = \case
-  EventKey (SpecialKey KeyUp) Down _ _ -> cmap $ \Player -> Acceleration 1
-  EventKey (SpecialKey KeyUp) Up _ _ -> cmap $ \Player -> Acceleration 0
+  EventKey (SpecialKey KeyUp) Down _ _ -> cmap $ \Player -> Accelerator True
+  EventKey (SpecialKey KeyUp) Up _ _ -> cmap $ \Player -> Accelerator False
   -- EventKey (SpecialKey KeyLeft) Down _ _ ->
   --   cmap $ \(Player, Velocity (V2 x _)) -> Velocity (V2 (x - playerSpeed) 0)
   -- EventKey (SpecialKey KeyLeft) Up _ _ ->
@@ -117,6 +125,10 @@ handleEvent = \case
 step :: Float -> System' ()
 step dT = do
   incrTime dT
+  cmap
+    $ \(Velocity v, Direction d, Accelerator a) ->
+      if a then Velocity (v + dT *^ d) else Velocity v
+  cmap $ \(Position p, Velocity v) -> Position (p + dT *^ v)
 
 translatePos :: Position -> Picture -> Picture
 translatePos (Position (V2 x y)) = translate x y
