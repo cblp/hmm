@@ -1,0 +1,14 @@
+cabal-version: 2.2
+
+name: hmm
+version: 0
+
+build-type: Simple
+
+executable hmm
+  build-depends:
+    apecs,
+    apecs-gloss,
+    base,
+    gloss,
+  main-is: Main.hs
