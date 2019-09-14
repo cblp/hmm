@@ -5,13 +5,13 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 
--- import System.Exit
 -- import System.Random
 -- import Control.Monad
 -- import Graphics.Gloss.Data.Bitmap
 import Apecs
 import Apecs.Gloss
 import Linear
+import System.Exit
 
 newtype Position = Position (V2 Float) deriving (Show)
 
@@ -45,7 +45,6 @@ makeWorld
 type System' a = System World a
 
 -- type Kinetic = (Position, Velocity)
-
 main :: IO ()
 main = do
   -- assets <- loadAssets
@@ -86,7 +85,7 @@ handleEvent = \case
   --   cmapM_ $ \(Player, pos :: Position) -> do
   --     _bullet <- newEntity (Bullet, pos, Velocity (V2 0 bulletSpeed))
   --     pure ()
-  -- EventKey (SpecialKey KeyEsc) Down _ _ -> liftIO exitSuccess
+  EventKey (SpecialKey KeyEsc) Down _ _ -> liftIO exitSuccess
   _ -> pure ()
 
 step :: Float -> System' ()
