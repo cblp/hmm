@@ -29,10 +29,6 @@ main
       handleEvent
       step
 
-sqrt2 :: Float
-sqrt2 = sqrt 2
-
-
 initialize :: System' ()
 initialize = do
   _enemy1 <-
