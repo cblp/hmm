@@ -38,7 +38,7 @@ instance Show ImageLoadException where
     , "Path: " <> imagePath
     ]
 
--- | Loads image using type given file path and type.
+-- | Loads image using given file path and type.
 load :: FilePath -> Image -> IO Picture
 load imagePath imageType = loadInfo ImageInfo{..}
 
