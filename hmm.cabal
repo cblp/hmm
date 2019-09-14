@@ -14,7 +14,8 @@ executable hmm
     linear,
     random,
     vector,
-    aeson-tiled
+    aeson-tiled,
+    hmm
   ghc-options:
     -Wall
     -threaded
@@ -30,3 +31,16 @@ executable hmm
     -Wpartial-fields
   default-language: Haskell2010
   main-is: Main.hs
+  hs-source-dirs: app
+library
+  hs-source-dirs: src
+  exposed-modules: World
+  build-depends: 
+    apecs,
+    apecs-gloss,
+    base,
+    gloss,
+    linear,
+    random,
+    vector,
+    aeson-tiled,
