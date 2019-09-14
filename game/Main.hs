@@ -5,6 +5,9 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 
+import Game.Data.TiledMap
+import Game.Data.FPS
+
 -- import System.Random
 -- import Control.Monad
 -- import Graphics.Gloss.Data.Bitmap
