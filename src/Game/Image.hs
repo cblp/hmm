@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Game.Image
@@ -10,13 +9,13 @@ import Graphics.Gloss.Data.Picture (Picture)
 import Graphics.Gloss.Juicy (loadJuicyJPG, loadJuicyPNG)
 
 -- | Supported image types.
-data Image =
-  | BMP
+data Image
+  = BMP
   | PNG
   | JPG
   deriving (Eq, Show)
 
-data ImageLoadException = ImageLoadException (FilePath, Image) deriving (Eq)
+newtype ImageLoadException = ImageLoadException (FilePath, Image) deriving (Eq)
 instance Exception ImageLoadException
 
 instance Show ImageLoadException where
