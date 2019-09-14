@@ -1,8 +1,13 @@
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Game.Image
   ( Image(..)
+  , ImageInfo(..)
   , load
+  , loadi
   ) where
 
 import Data.Maybe (fromMaybe)
@@ -18,24 +23,32 @@ data Image
   | JPG
   deriving (Eq, Show)
 
-newtype ImageLoadException = ImageLoadException (FilePath, Image) deriving (Eq)
+data ImageInfo = ImageInfo
+  { imagePath :: FilePath
+  , imageType :: Image
+  }
+
+newtype ImageLoadException = ImageLoadException ImageInfo
 instance Exception ImageLoadException
 
 instance Show ImageLoadException where
-  show (ImageLoadException (msg, img)) = unlines
-    [ "Failed to load image of type: " <> show img
-    , "Reason: " <> msg
+  show (ImageLoadException ImageInfo{..}) = unlines
+    [ "Failed to load image."
+    , "Type: " <> show imageType
+    , "Path: " <> imagePath
     ]
 
-
--- | Loads image of type given file path and type.
+-- | Loads image using type given file path and type.
 load :: FilePath -> Image -> IO Picture
-load path msg = case msg of
-  BMP -> loadBMP path
+load imagePath imageType = loadi ImageInfo{..}
+
+loadi :: ImageInfo -> IO Picture
+loadi info@ImageInfo{..} = case imageType of
+  BMP -> loadBMP imagePath
   PNG -> loadWith loadJuicyPNG
   JPG -> loadWith loadJuicyJPG
   where
     loadWith :: (FilePath -> IO (Maybe Picture)) -> IO Picture
     loadWith loader = do
-      pic <- loader path
-      return $ fromMaybe (throw $ ImageLoadException (path, msg)) pic
+      pic <- loader imagePath
+      return $ fromMaybe (throw $ ImageLoadException info) pic

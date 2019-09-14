@@ -12,14 +12,15 @@ import Apecs.Gloss as G
 import Game.World
 import Linear
 import System.Exit
-import Game.Image
+import Game.Image (Image(..))
+import qualified Game.Image as Image
 
 -- type Kinetic = (Position, Velocity)
 main :: IO ()
 main
   -- assets <- loadAssets
  = do
-  car <- load "assets/car.jpg" JPG
+  car <- Image.load "assets/car.jpg" JPG
   w <- initWorld
   runWith w $ do
     initialize car
@@ -69,8 +70,8 @@ draw :: System' Picture
 draw = do
   player <-
     foldDraw $ \(Machine, pos, Skin skin, Direction a, Velocity v) ->
-      translatePos pos 
-      $ mconcat 
+      translatePos pos
+      $ mconcat
           [ scale' 0.1 $ G.rotate (-a*180/pi + 90) $ skin
           , scale' 100 $ color red $ line' $ angle a
           , color blue $ line' v
