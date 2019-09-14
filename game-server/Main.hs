@@ -1,10 +1,8 @@
-{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main where
 
 import Control.Monad (forever)
-import Control.Concurrent (threadDelay)
 
 import Control.Monad.Trans.State.Strict (StateT, evalStateT)
 import Control.Monad.Trans (liftIO)
@@ -12,7 +10,7 @@ import Control.Monad.Trans (liftIO)
 import Game.Network
 
 
-data ServerSettings = ServerSettings { s_port :: Int } deriving Show
+newtype ServerSettings = ServerSettings { s_port :: Int } deriving Show
 
 data ServerState = ServerState {} deriving Show
 
@@ -29,16 +27,16 @@ main = do
 
 mainLoop :: ServerSettings -> Server
 mainLoop settings = do
-    liftIO $ print "GameJam server 0.0.1"
+    liftIO $ putStrLn "GameJam server 0.0.1"
 
     sock <- liftIO $ createSocket $ s_port settings
 
     acceptPlayers sock
 
-    liftIO $ forever do
+    liftIO $ forever $ do
         msg <- receiveMessage sock
         print msg
 
 
 acceptPlayers :: Socket -> Server
-acceptPlayers socket = pure ()
+acceptPlayers _socket = pure ()
