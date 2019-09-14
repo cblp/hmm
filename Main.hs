@@ -179,7 +179,7 @@ step dT = do
   incrTime dT
   cmap $ \(Velocity v, Direction d, Accelerator a) ->
     if a
-      then Velocity (v + dT *^ d)
+      then Velocity (v + acceleration * dT *^ d)
       else Velocity v
   cmap $ \(Position p, Velocity v) -> Position (p + dT *^ v)
 
@@ -191,3 +191,6 @@ drawMachine (Skin skin) = color skin
 
 incrTime :: Float -> System' ()
 incrTime dT = modify global $ \(Time t) -> Time (t + dT)
+
+acceleration :: Float
+acceleration = 100
