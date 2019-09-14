@@ -53,7 +53,6 @@ executable hmm
   hs-source-dirs: game
   main-is: Main.hs
 
-
 executable game-server
   build-depends:
     base,
@@ -68,17 +67,3 @@ executable game-server
   main-is: Main.hs
   hs-source-dirs:
     game-server
-
-library game-network
-  build-depends:
-    base,
-    bytestring,
-    network,
-  ghc-options:
-    -Wall
-  default-language: Haskell2010
-  hs-source-dirs:
-    game-network
-  exposed-modules:
-    Game.Network
-    Game.Message
