@@ -6,8 +6,13 @@ module Game.Network
     , Socket
     ) where
 
+import Data.ByteString.Lazy.Char8 (toStrict, fromStrict)
+import Data.ByteString (ByteString)
+
+import Codec.Serialise (serialise, deserialise)
+
 import Network.Socket hiding     (recv, recvFrom)
-import Network.Socket.ByteString (recv, sendAll)
+import Network.Socket.ByteString (recvFrom, sendAllTo)
 
 import Game.Message (Message(..))
 
@@ -19,17 +24,28 @@ chunkSize = 4096
 
 createSocket :: Int -> IO Socket
 createSocket port = do
-    addrinfos <- getAddrInfo Nothing (Just "localhost") (Just $ show port)
+    addrinfos <- getAddrInfo Nothing Nothing (Just $ show port)
     let addr = head addrinfos
     sock <- socket (addrFamily addr) Datagram defaultProtocol
     bind sock (addrAddress addr)
     pure sock
 
 
-receiveMessage :: Socket -> IO Message
-receiveMessage socket = do
-    bytes <- recv socket chunkSize
-    print $ "raw bytes: " <> bytes
+parseMessage :: ByteString -> Message
+parseMessage = deserialise . fromStrict
 
-    -- FIXME: parse message for real
-    pure $ NewPlayer "Player"
+
+unparseMessage :: Message -> ByteString
+unparseMessage = toStrict . serialise
+
+
+receiveMessage :: Socket -> IO (Message, SockAddr)
+receiveMessage socket = do
+    (bytes, addr) <- recvFrom socket chunkSize
+    print $ "raw bytes: " <> bytes
+    pure $ (parseMessage bytes, addr)
+
+
+sendMessage :: Socket -> Message -> SockAddr -> IO ()
+sendMessage socket msg = sendAllTo socket $ unparseMessage msg
+

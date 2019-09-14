@@ -52,6 +52,7 @@ library game-network
     base,
     bytestring,
     network,
+    serialise,
   ghc-options:
     -Wall
     -threaded
