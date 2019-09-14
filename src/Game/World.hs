@@ -33,12 +33,19 @@ newtype Velocity =
 instance Component Velocity where
   type Storage Velocity = Map Velocity
 
-newtype Accelerator =
-  Accelerator Bool
+newtype AcceleratePedal =
+  AcceleratePedal Bool
   deriving (Show)
 
-instance Component Accelerator where
-  type Storage Accelerator = Map Accelerator
+instance Component AcceleratePedal where
+  type Storage AcceleratePedal = Map AcceleratePedal
+
+newtype BrakePedal =
+  BrakePedal Bool
+  deriving (Show)
+
+instance Component BrakePedal where
+  type Storage BrakePedal = Map BrakePedal
 
 newtype Time =
   Time Float
@@ -76,7 +83,8 @@ instance Component Skin where
 
 makeWorld
   "World"
-    [ ''Accelerator
+    [ ''AcceleratePedal
+    , ''BrakePedal
     , ''Camera
     , ''Direction
     , ''Machine

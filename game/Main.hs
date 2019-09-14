@@ -2,6 +2,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -37,7 +38,12 @@ initialize :: System' ()
 initialize = do
   _enemy1 <-
     newEntity
-      (Machine, Position (V2 50 50), Velocity 0, Direction $ V2 (1/sqrt2) (1/sqrt2), Skin red)
+      ( Machine
+      , Position (V2 50 50)
+      , Velocity 0
+      , Direction $ V2 (1/sqrt2) (1/sqrt2)
+      , Skin red
+      )
   _enemy2 <-
     newEntity
       ( Machine
@@ -51,7 +57,8 @@ initialize = do
       , Machine
       , Position 0
       , Velocity 0
-      , Accelerator False
+      , AcceleratePedal False
+      , BrakePedal False
       , Direction $ V2 0 1
       , Skin white)
   pure ()
@@ -81,30 +88,22 @@ scale' factor = scale factor factor
 handleEvent :: Event -> System' ()
 handleEvent =
   \case
-    EventKey (SpecialKey KeyUp) Down _ _ -> cmap $ \Player -> Accelerator True
-    EventKey (SpecialKey KeyUp) Up _ _ -> cmap $ \Player -> Accelerator False
-  -- EventKey (SpecialKey KeyLeft) Down _ _ ->
-  --   cmap $ \(Player, Velocity (V2 x _)) -> Velocity (V2 (x - playerSpeed) 0)
-  -- EventKey (SpecialKey KeyLeft) Up _ _ ->
-  --   cmap $ \(Player, Velocity (V2 x _)) -> Velocity (V2 (x + playerSpeed) 0)
-  -- EventKey (SpecialKey KeyRight) Down _ _ ->
-  --   cmap $ \(Player, Velocity (V2 x _)) -> Velocity (V2 (x + playerSpeed) 0)
-  -- EventKey (SpecialKey KeyRight) Up _ _ ->
-  --   cmap $ \(Player, Velocity (V2 x _)) -> Velocity (V2 (x - playerSpeed) 0)
-  -- EventKey (SpecialKey KeySpace) Down _ _ ->
-  --   cmapM_ $ \(Player, pos :: Position) -> do
-  --     _bullet <- newEntity (Bullet, pos, Velocity (V2 0 bulletSpeed))
-  --     pure ()
+    EventKey (SpecialKey KeyUp) state _ _ ->
+      cmap $ \Player -> AcceleratePedal (state == Down)
+    EventKey (SpecialKey KeyDown) state _ _ ->
+      cmap $ \Player -> BrakePedal (state == Down)
     EventKey (SpecialKey KeyEsc) Down _ _ -> liftIO exitSuccess
     _ -> pure ()
 
 step :: Float -> System' ()
 step dT = do
   incrTime dT
-  cmap $ \(Velocity v, Direction d, Accelerator a) ->
-    if a
-      then Velocity (v + acceleration * dT *^ d)
-      else Velocity v
+  cmap $ \(Velocity v, Direction d, AcceleratePedal a, BrakePedal b) ->
+    if
+      | a && not b -> Velocity (v + acceleration * dT *^ d)
+      | b, let dv = - brakeFriction * dT *^ v, dot (v + dv) v > 0 ->
+            Velocity (v + dv)
+      | otherwise -> Velocity v
   cmap $ \(Position p, Velocity v) -> Position (p + dT *^ v)
 
 translatePos :: Position -> Picture -> Picture
@@ -118,3 +117,6 @@ incrTime dT = modify global $ \(Time t) -> Time (t + dT)
 
 acceleration :: Float
 acceleration = 100
+
+brakeFriction :: Float
+brakeFriction = 200
