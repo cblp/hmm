@@ -70,11 +70,14 @@ initialize = do
   pure ()
 
 worldWidth, worldHeight :: Int
-worldWidth = 600
+worldWidth = 1000
 worldHeight = 800
 
 draw :: System' Picture
-draw = pure mempty
+draw = do
+  player <-
+    foldDraw $ \(Player, pos) -> translatePos pos $ color white $ circle 100
+  pure player
 
 handleEvent :: Event -> System' ()
 handleEvent = \case
@@ -96,3 +99,6 @@ handleEvent = \case
 step :: Float -> System' ()
 step _dT = do
   pure ()
+
+translatePos :: Position -> Picture -> Picture
+translatePos (Position (V2 x y)) = translate x y
