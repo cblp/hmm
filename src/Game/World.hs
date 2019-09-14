@@ -112,3 +112,14 @@ type System' a = System World a
 
 radiusDirection :: Float -> Float -> Direction
 radiusDirection radius angle = Direction $ V2 (radius * (sin angle)) (radius * (cos angle))
+
+getAngle :: Float -> Float -> Float
+getAngle x y = atan (x/y)
+
+rotateDirection :: Direction -> Float -> Direction
+rotateDirection (Direction (V2 x y)) deltaAngle = 
+  radiusDirection radius newAngle
+    where
+      radius = sqrt (x^2 + y^2)
+      oldAngle = getAngle x y
+      newAngle = oldAngle + deltaAngle
