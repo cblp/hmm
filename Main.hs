@@ -115,8 +115,11 @@ handleEvent = \case
   _ -> pure ()
 
 step :: Float -> System' ()
-step _dT = do
-  pure ()
+step dT = do
+  incrTime dT
 
 translatePos :: Position -> Picture -> Picture
 translatePos (Position (V2 x y)) = translate x y
+
+incrTime :: Float -> System' ()
+incrTime dT = modify global $ \(Time t) -> Time (t + dT)
