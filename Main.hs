@@ -33,13 +33,18 @@ data Player = Player deriving (Show)
 
 instance Component Player where type Storage Player = Unique Player
 
+data Machine = Machine deriving (Show)
+
+instance Component Machine where type Storage Machine = Map Machine
+
 makeWorld
   "World"
   [ ''Position,
     ''Velocity,
     ''Time,
     ''Player,
-    ''Camera
+    ''Camera,
+    ''Machine
     ]
 
 type System' a = System World a
@@ -61,7 +66,7 @@ main = do
 
 initialize :: System' ()
 initialize = do
-  -- _player <- newEntity (Player, Position playerStartPos, Velocity 0)
+  _player <- newEntity (Player, Machine, Position 0, Velocity 0)
   pure ()
 
 worldWidth, worldHeight :: Int
