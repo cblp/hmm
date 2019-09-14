@@ -17,6 +17,10 @@ newtype Position = Position (V2 Float) deriving (Show)
 
 instance Component Position where type Storage Position = Map Position
 
+newtype Direction = Direction (V2 Float) deriving (Show)
+
+instance Component Direction where type Storage Direction = Map Direction
+
 newtype Velocity = Velocity (V2 Float) deriving (Show)
 
 instance Component Velocity where type Storage Velocity = Map Velocity
@@ -73,10 +77,16 @@ worldWidth, worldHeight :: Int
 worldWidth = 1000
 worldHeight = 800
 
+machineSize :: Float
+machineSize = 100
+
 draw :: System' Picture
 draw = do
   player <-
-    foldDraw $ \(Machine, pos) -> translatePos pos $ color white $ circle 100
+    foldDraw $ \(Machine, pos) ->
+      translatePos pos
+        $ color white
+            (circle (machineSize / 2) <> line [(0, 0), (0, machineSize / 2)])
   pure player
 
 handleEvent :: Event -> System' ()
