@@ -56,7 +56,7 @@ initialize = do
       , Machine
       , Position 0
       , Velocity 0
-      , Accelerator False
+      , AcceleratePedal False
       , BrakePedal False
       , radiusDirection 1 (pi/4)
       , Skin white)
