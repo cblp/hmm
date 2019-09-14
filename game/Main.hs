@@ -96,11 +96,12 @@ handleEvent =
 step :: Float -> System' ()
 step dT = do
   incrTime dT
-  cmap $ \(Velocity v, Direction d, AcceleratePedal a, BrakePedal b) ->
+  cmap $ \(Player, Velocity v, Direction d, AcceleratePedal a, BrakePedal b) ->
     if
       | a && not b -> Velocity (v + acceleration * dT *^ d)
-      | b, let dv = - brakeFriction * dT *^ v, dot (v + dv) v > 0 ->
-            Velocity (v + dv)
+      | b ->
+        let v' = v - brakeFriction * dT *^ normalize v
+         in Velocity $ if dot v v' > 0 then v' else 0
       | otherwise -> Velocity v
   cmap $ \(Position p, Velocity v) -> Position (p + dT *^ v)
 
