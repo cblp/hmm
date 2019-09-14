@@ -39,6 +39,18 @@ newtype AcceleratePedal =
 instance Component AcceleratePedal where
   type Storage AcceleratePedal = Map AcceleratePedal
 
+newtype SteerLeft = SteerLeft Bool
+  deriving (Show)
+
+instance Component SteerLeft where
+  type Storage SteerLeft = Map SteerLeft
+
+newtype SteerRight = SteerRight Bool
+  deriving (Show)
+
+instance Component SteerRight where
+  type Storage SteerRight = Map SteerRight
+
 newtype BrakePedal =
   BrakePedal Bool
   deriving (Show)
@@ -91,6 +103,8 @@ makeWorld
     , ''Position
     , ''Time
     , ''Skin
+    , ''SteerLeft
+    , ''SteerRight
     , ''Velocity
     ]
 
