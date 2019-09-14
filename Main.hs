@@ -67,7 +67,7 @@ main = do
   runWith w $ do
     initialize
     play
-      (InWindow "Shmup" (worldWidth, worldHeight) (10, 10))
+      (InWindow "Haskell Micro Machines" (worldWidth, worldHeight) (10, 10))
       black
       60
       draw {- assets -}
