@@ -9,7 +9,7 @@ module Game.Data.TiledMap
 
 import Data.Maybe (fromJust)
 import Control.Exception (Exception, throw)
-import Graphics.Gloss (Picture(..))
+import Graphics.Gloss (Picture)
 import Data.Aeson.Tiled hiding (Vector)
 import Data.Vector (Vector)
 import qualified Data.Vector as Vector
@@ -39,12 +39,11 @@ instance Show TiledMapLoadException where
 load :: TiledMapInfo -> IO TiledMap
 load info@TiledMapInfo{..} = do
   tileset <- Image.loadi tilesetImage
-  tiledmap <- loadTiledmap jsonPath >>= either throwException return
-  let tiles = mkTiles tiledmap
+  tiledmap <- loadTiledmap jsonPath
+  let tiles = mkTiles $ either err id tiledmap
   return TiledMap{..}
   where
-    throwException msg =
-      throw $ TiledMapLoadException (info, msg)
+    err msg = throw $ TiledMapLoadException (info, msg)
 
 mkTiles :: Tiledmap -> Vector GlobalId
 mkTiles tilemap =

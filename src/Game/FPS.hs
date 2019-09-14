@@ -1,4 +1,4 @@
-module Game.Data.FPS
+module Game.FPS
   ( FPS(..)
   ) where
 

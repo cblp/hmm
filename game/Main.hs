@@ -36,7 +36,7 @@ initialize :: Picture ->  System' ()
 initialize pic = do
   _enemy1 <-
     newEntity
-      (Machine
+      ( Machine
       , Position (V2 50 50)
       , Velocity 0
       , Direction (pi/4)

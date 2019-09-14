@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="4" height="4" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="5">
+ <tileset firstgid="1" source="../../../../../../github/gamedev/tiled/examples/desert.tsx"/>
+ <layer id="1" name="mainlayer" width="4" height="4">
+  <data encoding="csv">
+6,7,7,8,
+14,15,15,16,
+14,15,15,16,
+22,23,23,24
+</data>
+ </layer>
+</map>
