@@ -25,6 +25,11 @@ newtype Velocity = Velocity (V2 Float) deriving (Show)
 
 instance Component Velocity where type Storage Velocity = Map Velocity
 
+newtype Acceleration = Acceleration (V2 Float) deriving (Show)
+
+instance Component Acceleration where
+  type Storage Acceleration = Map Acceleration
+
 newtype Time = Time Float deriving (Show, Num)
 
 instance Semigroup Time where (<>) = (+)
@@ -43,7 +48,8 @@ instance Component Machine where type Storage Machine = Map Machine
 
 makeWorld
   "World"
-  [ ''Position,
+  [ ''Acceleration,
+    ''Position,
     ''Velocity,
     ''Time,
     ''Player,
@@ -91,6 +97,8 @@ draw = do
 
 handleEvent :: Event -> System' ()
 handleEvent = \case
+  EventKey (SpecialKey KeyUp) Down _ _ -> cmap $ \Player -> Acceleration 1
+  EventKey (SpecialKey KeyUp) Up _ _ -> cmap $ \Player -> Acceleration 0
   -- EventKey (SpecialKey KeyLeft) Down _ _ ->
   --   cmap $ \(Player, Velocity (V2 x _)) -> Velocity (V2 (x - playerSpeed) 0)
   -- EventKey (SpecialKey KeyLeft) Up _ _ ->
