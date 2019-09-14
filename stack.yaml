@@ -1,5 +1,9 @@
 resolver: lts-14.0
 
+packages:
+  - .
+  - game-network
+
 extra-deps:
-- aeson-tiled-0.0.0.1
-- gloss-juicy-0.2.3
+  - aeson-tiled-0.0.0.1
+  - gloss-juicy-0.2.3
