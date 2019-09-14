@@ -74,7 +74,7 @@ instance Component Machine where
   type Storage Machine = Map Machine
 
 newtype Skin =
-  Skin Color
+  Skin Picture
   deriving (Show)
 
 instance Component Skin where

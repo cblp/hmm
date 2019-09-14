@@ -6,6 +6,7 @@ module Game.Image
   ) where
 
 import Data.Maybe (fromMaybe)
+import Data.Maybe (fromJust)
 import Control.Exception (Exception, throw)
 import Graphics.Gloss.Data.Bitmap (loadBMP)
 import Graphics.Gloss.Data.Picture (Picture)
@@ -31,9 +32,9 @@ instance Show ImageLoadException where
 -- | Loads image of type given file path and type.
 load :: FilePath -> Image -> IO Picture
 load path msg = case msg of
-  BMP -> loadBMP path
+  BMP -> undefined -- loadBMP path
   PNG -> undefined -- loadWith loadJuicyPNG
-  JPG -> undefined -- loadWith loadJuicyJPG
+  JPG -> fromJust <$> loadJuicyJPG path
   where
     loadWith :: (FilePath -> Maybe a) -> a
     loadWith f = fromMaybe (throw $ ImageLoadException (path, msg)) (f path)
