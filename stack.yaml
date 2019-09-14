@@ -2,3 +2,4 @@ resolver: lts-14.0
 
 extra-deps:
 - aeson-tiled-0.0.0.1
+- gloss-juicy-0.2.3
