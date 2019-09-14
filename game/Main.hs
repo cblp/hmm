@@ -104,6 +104,9 @@ step dT = do
         let v' = v - brakeFriction * dT *^ normalize v
          in Velocity $ if dot v v' > 0 then v' else 0
       | otherwise -> Velocity v
+  cmap $ \(Velocity v) ->
+    let v' = v - terrainFriction * dT *^ normalize v
+     in Velocity $ if dot v v' > 0 then v' else 0
   cmap $ \(Position p, Velocity v) -> Position (p + dT *^ v)
 
 translatePos :: Position -> Picture -> Picture
@@ -125,3 +128,6 @@ acceleration = 100
 
 brakeFriction :: Float
 brakeFriction = 200
+
+terrainFriction :: Float
+terrainFriction = 50
