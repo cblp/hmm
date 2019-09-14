@@ -71,14 +71,14 @@ machineSize = 100
 
 draw :: System' Picture
 draw = do
-  player <-
+  machines <-
     foldDraw $ \(Machine, pos, Direction (V2 dx dy), skin) ->
       translatePos pos $
       drawMachine
         skin
         (circle (machineSize / 2) <>
          scale' (machineSize / 2) (line [(0, 0), (dx, dy)]))
-  pure player
+  pure machines
 
 scale' :: Float -> Picture -> Picture
 scale' factor = scale factor factor
@@ -119,9 +119,9 @@ incrTime :: Float -> System' ()
 incrTime dT = modify global $ \(Time t) -> Time (t + dT)
 
 cameraFollowsThePlayer :: System' ()
-cameraFollowsThePlayer = do
-  cmapM_ $ \(Player, (Position v)) ->
-    modify global $ \(Camera _ s) -> Camera v s
+cameraFollowsThePlayer =
+  cmapM_ $ \(Player, Position p) ->
+    modify global $ \(Camera _ s) -> Camera p s
 
 acceleration :: Float
 acceleration = 100
