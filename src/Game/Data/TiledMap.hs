@@ -9,8 +9,6 @@ import Control.Exception (Exception)
 import Graphics.Gloss (Picture(..))
 import Data.Aeson.Tiled hiding (Vector)
 import qualified Data.Vector as V
-import Game.Image (Image)
-import qualified Game.Image as Image
 
 newtype MapLoadException = MapLoadException String deriving (Eq)
 instance Exception MapLoadException

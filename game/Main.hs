@@ -22,7 +22,7 @@ main
   car <- load "assets/car.jpg" JPG
   w <- initWorld
   runWith w $ do
-    (initialize car)
+    initialize car
     play
       (InWindow "Haskell Micro Machines" (worldWidth, worldHeight) (10, 10))
       black
@@ -38,7 +38,7 @@ initialize pic = do
       (Machine
       , Position (V2 50 50)
       , Velocity 0
-      , radiusDirection 1 (pi/4)
+      , Direction (pi/4)
       , Skin pic
       )
   _enemy2 <-
@@ -46,7 +46,7 @@ initialize pic = do
       ( Machine
       , Position (V2 (-50) (-50))
       , Velocity 0
-      , radiusDirection 1 (pi/2)
+      , Direction (pi/2)
       , Skin pic)
   _player <-
     newEntity
@@ -54,7 +54,7 @@ initialize pic = do
       , Machine
       , (Position 0, Velocity 0)
       , (AcceleratePedal False, BrakePedal False)
-      , radiusDirection 1 0
+      , Direction 0
       , Skin pic
       , (SteerLeft False, SteerRight False)
       )
@@ -65,14 +65,11 @@ worldWidth = 1000
 
 worldHeight = 800
 
-machineSize :: Float
-machineSize = 100
-
 draw :: System' Picture
 draw = do
   player <-
-    foldDraw $ \(Machine, pos, Direction (V2 dx dy), (Skin skin)) ->
-      translatePos pos $ scale' 0.1 $ skin
+    foldDraw $ \(Machine, pos, Skin skin) ->
+      translatePos pos $ scale' 0.1 skin
   pure player
 
 scale' :: Float -> Picture -> Picture
@@ -100,16 +97,14 @@ step dT = do
     let steering = dT * steerSpeed
      in if
           | sl && not sr ->
-            ( Direction $ rotateV2 (- steering) d,
-              Velocity $ rotateV2 (- steering) v
-              )
+            (Direction $ d - steering, Velocity $ rotateV2 (- steering) v)
           | sr && not sl ->
-            (Direction $ rotateV2 steering d, Velocity $ rotateV2 steering v)
+            (Direction $ d + steering, Velocity $ rotateV2 steering v)
           | otherwise -> (Direction d, Velocity v)
   cmap
     $ \(Player, velocity@(Velocity v), Direction d, AcceleratePedal a, BrakePedal b) ->
       if
-        | a && not b -> Velocity (v + acceleration * dT *^ d)
+        | a && not b -> Velocity (v + acceleration * dT *^ angle d)
         | b -> decelerate dT velocity brakeFriction
         | otherwise -> Velocity v
   cmap $ \v -> decelerate dT v terrainFriction
