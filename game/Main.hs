@@ -56,13 +56,8 @@ initialize pic = do
       , Velocity 0
       , AcceleratePedal False
       , BrakePedal False
-<<<<<<< HEAD
-      , radiusDirection 1 (pi/2)
-      , Skin white)
-=======
       , radiusDirection 1 0
       , Skin pic)
->>>>>>> 03560d7ac035c0a75242ddf37bcda6a23d8f581e
   pure ()
 
 worldWidth, worldHeight :: Int
