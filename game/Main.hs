@@ -1,4 +1,7 @@
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE PatternSynonyms  #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE MultiWayIf #-}
@@ -12,25 +15,44 @@ import Apecs.Gloss as G
 import Game.World
 import Linear
 import System.Exit
-import Game.Image (Image(..))
+import Control.Lens ((^.), view)
+
+import Game (MonadGame, newEnv, runGame)
 import qualified Game.Image as Image
+import qualified Game.Level as Level
+import Game.Image (Image(..))
+import Game.Config (Config, width, height, startLevel)
+import Game.Env (config, currentLevel)
+
+import qualified CLI
+
+import Colog (pattern I, withLogTextFile, log)
+import Options.Applicative (execParser)
+import System.Directory (createDirectoryIfMissing)
 
 -- type Kinetic = (Position, Velocity)
+
 main :: IO ()
-main
-  -- assets <- loadAssets
- = do
-  car <- Image.load "assets/car.jpg" JPG
-  w <- initWorld
-  runWith w $ do
-    initialize car
-    play
-      (InWindow "Haskell Micro Machines" (worldWidth, worldHeight) (10, 10))
-      black
-      60
-      draw
-      handleEvent
-      step
+main = do
+  cfg <- CLI.parse
+  let logsDir = "logs"
+      logPath = logsDir <> "/hmm.log"
+  createDirectoryIfMissing True logsDir
+  withLogTextFile logPath $ \logger -> do
+    lvl <- Level.load $ cfg ^. startLevel
+    env <- newEnv logger cfg lvl
+    runGame env game
+
+game :: MonadGame m => m ()
+game = do
+  cfg <- view config
+  liftIO $ do
+    car <- Image.load "assets/car.jpg" JPG
+    w <- initWorld
+    runWith w $ do
+      initialize car
+      let window = InWindow "Haskell Micro Machines" (cfg ^. width, cfg ^. height) (10, 10)
+      play window black 60 draw handleEvent step
 
 initialize :: Picture ->  System' ()
 initialize pic = do
@@ -60,11 +82,6 @@ initialize pic = do
       , (SteerLeft False, SteerRight False)
       )
   pure ()
-
-worldWidth, worldHeight :: Int
-worldWidth = 1000
-
-worldHeight = 800
 
 draw :: System' Picture
 draw = do

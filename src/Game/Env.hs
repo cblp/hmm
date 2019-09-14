@@ -1,15 +1,21 @@
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE InstanceSigs          #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RecordWildCards       #-}
+{-# LANGUAGE TemplateHaskell       #-}
 
 module Game.Env
   ( Env(..)
   , newEnv
+  , logger
+  , currentLevel
+  , config
   ) where
 
 import Data.Text (Text)
 import Control.Monad.IO.Class (MonadIO)
+import Control.Lens (makeLenses)
 import Data.IORef (IORef, newIORef)
 import Colog (HasLog, LogAction, Message, cmapM, defaultFieldMap,
               fmtRichMessageDefault, getLogAction, liftLogIO, logTextStdout,
@@ -23,19 +29,21 @@ import Game.Level (Level)
 -- function with the `MonadReader` constraint.
 data Env m = Env
   { -- | A `LogAction` to be used by the `co-log` package.
-    logger :: !(LogAction m Message)
+    _logger :: !(LogAction m Message)
     -- | Reference to a current level.
-  , level :: !(IORef Level)
+  , _currentLevel :: !(IORef Level)
     -- | Game configuration options.
-  , config :: !Config
+  , _config :: !Config
   }
+
+makeLenses ''Env
 
 instance HasLog (Env m) Message m where
   getLogAction :: Env m -> LogAction m Message
-  getLogAction = logger
+  getLogAction = _logger
 
   setLogAction :: LogAction m Message -> Env m -> Env m
-  setLogAction action env = env { logger = action }
+  setLogAction _logger env = env { _logger }
 
 -- | Creates a record that matches the `Env` type our
 -- application requires by filling in necessary fields.
@@ -45,11 +53,11 @@ newEnv
   -> Config
   -> Level
   -> IO (Env m)
-newEnv logTextFile config lvl = do
+newEnv logTextFile _config startLevel = do
   let
     logText = logTextStdout <> logTextFile
     logRich = cmapM fmtRichMessageDefault logText
     logFull = upgradeMessageAction defaultFieldMap logRich
-    logger  = liftLogIO logFull
-  level <- newIORef lvl
+    _logger = liftLogIO logFull
+  _currentLevel <- newIORef startLevel
   return Env{..}
