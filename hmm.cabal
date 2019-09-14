@@ -10,6 +10,7 @@ library
   hs-source-dirs: src
   exposed-modules:
     Game.World
+    Game.Image
     Game.Data.TiledMap
     Game.Data.FPS
   build-depends:
@@ -24,7 +25,7 @@ library
     vector,
     aeson-tiled,
 
-executable game
+executable hmm
   build-depends:
     apecs,
     apecs-gloss,
