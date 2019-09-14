@@ -94,17 +94,19 @@ step :: Float -> System' ()
 step dT = do
   incrTime dT
   cameraFollowsThePlayer
-  cmap $ \(Player, Velocity v, Direction d, AcceleratePedal a, BrakePedal b) ->
-    if
-      | a && not b -> Velocity (v + acceleration * dT *^ d)
-      | b ->
-        let v' = v - brakeFriction * dT *^ normalize v
-         in Velocity $ if dot v v' > 0 then v' else 0
-      | otherwise -> Velocity v
-  cmap $ \(Velocity v) ->
-    let v' = v - terrainFriction * dT *^ normalize v
-     in Velocity $ if dot v v' > 0 then v' else 0
+  cmap
+    $ \(Player, velocity@(Velocity v), Direction d, AcceleratePedal a, BrakePedal b) ->
+      if
+        | a && not b -> Velocity (v + acceleration * dT *^ d)
+        | b -> decelerate dT velocity brakeFriction
+        | otherwise -> Velocity v
+  cmap $ \v -> decelerate dT v terrainFriction
   cmap $ \(Position p, Velocity v) -> Position (p + dT *^ v)
+
+decelerate :: Float -> Velocity -> Float -> Velocity
+decelerate dT (Velocity v) friction =
+  let v' = v - friction * dT *^ normalize v
+   in Velocity $ if dot v v' > 0 then v' else 0
 
 translatePos :: Position -> Picture -> Picture
 translatePos (Position (V2 x y)) = translate x y
