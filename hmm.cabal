@@ -17,6 +17,7 @@ library
     apecs-gloss,
     base,
     gloss,
+    gloss-juicy,
     linear,
     random,
     vector,
