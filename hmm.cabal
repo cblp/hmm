@@ -10,9 +10,12 @@ library
   hs-source-dirs: src
   exposed-modules:
     Game
+    Game.Env
     Game.World
+    Game.Level
     Game.Image
     Game.Data.TiledMap
+    Game.Data.Assets
     Game.Data
     Game.FPS
     Game.Animation
@@ -27,6 +30,10 @@ library
     random,
     vector,
     aeson-tiled,
+    co-log,
+    text,
+    mtl,
+    natural-transformation,
 
 executable hmm
   build-depends:
@@ -38,6 +45,10 @@ executable hmm
     random,
     vector,
     aeson-tiled,
+    co-log,
+    text,
+    mtl,
+    natural-transformation,
     hmm
   ghc-options:
     -Wall

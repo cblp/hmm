@@ -1,6 +1,7 @@
-{ mkDerivation, aeson-tiled, apecs, apecs-gloss, base, bytestring
-, gloss, gloss-juicy, linear, mtl, network, random, stdenv
-, transformers, vector
+{ mkDerivation, aeson-tiled, apecs, apecs-gloss, base, co-log
+, game-network, gloss, gloss-juicy, linear, mtl
+, natural-transformation, random, stdenv, text, transformers
+, vector
 }:
 mkDerivation {
   pname = "hmm";
@@ -9,14 +10,13 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    aeson-tiled apecs apecs-gloss base bytestring gloss gloss-juicy
-    linear network random vector
+    aeson-tiled apecs apecs-gloss base gloss gloss-juicy linear random
+    text vector
   ];
   executableHaskellDepends = [
-    aeson-tiled apecs apecs-gloss base gloss linear mtl random
-    transformers vector
+    aeson-tiled apecs apecs-gloss base co-log game-network gloss linear
+    mtl natural-transformation random text transformers vector
   ];
-  doHaddock = false;
   license = "unknown";
   hydraPlatforms = stdenv.lib.platforms.none;
 }
