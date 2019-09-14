@@ -1,8 +1,12 @@
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Game.Data.TiledMap
   ( TiledMap(..)
   -- , load
   ) where
 
+import Data.Text (Text)
 import Control.Exception (Exception)
 import Graphics.Gloss (Picture(..))
 import Data.Aeson.Tiled hiding (Vector)
