@@ -103,9 +103,9 @@ step dT = do
   cmap $ \(Player, SteerLeft sl, SteerRight sr, Direction d, Velocity v) ->
     let steering = dT * steerSpeed
      in if
-          | sl && not sr ->
+          | sl && not sr && v /= 0 ->
             (Direction $ d + steering, Velocity $ rotateV2 (- steering) v)
-          | sr && not sl ->
+          | sr && not sl && v /= 0 ->
             (Direction $ d - steering, Velocity $ rotateV2 steering v)
           | otherwise -> (Direction d, Velocity v)
   cmap
