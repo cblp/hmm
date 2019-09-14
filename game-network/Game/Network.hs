@@ -7,15 +7,13 @@ module Game.Network
     ) where
 
 import Network.Socket hiding     (recv, recvFrom)
-import Network.Socket.ByteString (recv, sendAll)
+import Network.Socket.ByteString (recv)
 
 import Game.Message (Message(..))
-
 
 -- FIXME: this should depend on Message
 chunkSize :: Int
 chunkSize = 4096
-
 
 createSocket :: Int -> IO Socket
 createSocket port = do
@@ -25,11 +23,9 @@ createSocket port = do
     bind sock (addrAddress addr)
     pure sock
 
-
 receiveMessage :: Socket -> IO Message
-receiveMessage socket = do
-    bytes <- recv socket chunkSize
+receiveMessage sock = do
+    bytes <- recv sock chunkSize
     print $ "raw bytes: " <> bytes
-
     -- FIXME: parse message for real
     pure $ NewPlayer "Player"
