@@ -97,11 +97,16 @@ machineSize = 100
 draw :: System' Picture
 draw = do
   player <-
-    foldDraw $ \(Machine, pos) ->
+    foldDraw $ \(Machine, pos, Direction (V2 dx dy)) ->
       translatePos pos
         $ color white
-            (circle (machineSize / 2) <> line [(0, 0), (0, machineSize / 2)])
+            ( circle (machineSize / 2)
+                <> scale' (machineSize / 2) (line [(0, 0), (dx, dy)])
+              )
   pure player
+
+scale' :: Float -> Picture -> Picture
+scale' factor = scale factor factor
 
 handleEvent :: Event -> System' ()
 handleEvent = \case
