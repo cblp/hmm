@@ -8,7 +8,7 @@
 -- import Control.Monad
 -- import Graphics.Gloss.Data.Bitmap
 import Apecs
-import Apecs.Gloss
+import Apecs.Gloss as G
 import Game.World
 import Linear
 import System.Exit
@@ -54,7 +54,7 @@ initialize pic = do
       , Machine
       , (Position 0, Velocity 0)
       , (AcceleratePedal False, BrakePedal False)
-      , Direction 0
+      , Direction (pi/2)
       , Skin pic
       , (SteerLeft False, SteerRight False)
       )
@@ -68,9 +68,16 @@ worldHeight = 800
 draw :: System' Picture
 draw = do
   player <-
-    foldDraw $ \(Machine, pos, Skin skin) ->
-      translatePos pos $ scale' 0.1 skin
+    foldDraw $ \(Machine, pos, Skin skin, Direction a, Velocity v) ->
+      translatePos pos 
+      $ mconcat 
+          [ scale' 0.1 $ G.rotate (-a*180/pi + 90) $ skin
+          , scale' 100 $ color red $ line' $ angle a
+          , color blue $ line' v
+          ]
   pure player
+
+line' (V2 x y) = line [(0, 0), (x, y)]
 
 scale' :: Float -> Picture -> Picture
 scale' factor = scale factor factor
@@ -97,9 +104,9 @@ step dT = do
     let steering = dT * steerSpeed
      in if
           | sl && not sr ->
-            (Direction $ d - steering, Velocity $ rotateV2 (- steering) v)
+            (Direction $ d + steering, Velocity $ rotateV2 (- steering) v)
           | sr && not sl ->
-            (Direction $ d + steering, Velocity $ rotateV2 steering v)
+            (Direction $ d - steering, Velocity $ rotateV2 steering v)
           | otherwise -> (Direction d, Velocity v)
   cmap
     $ \(Player, velocity@(Velocity v), Direction d, AcceleratePedal a, BrakePedal b) ->
