@@ -19,8 +19,11 @@ common shared
     linear,
     random,
     vector,
+    unordered-containers,
     aeson-tiled,
     co-log,
+    filepath,
+    directory,
     text,
     exceptions,
     transformers,
@@ -40,11 +43,11 @@ library
     Game.World
     Game.Level
     Game.Image
+    Game.Sound
     Game.FPS
     Game.Animation
-    Game.Data
-    Game.Data.TiledMap
-    Game.Data.Assets
+    Game.TiledMap
+    Game.Assets
   ghc-options:
     -Wall
     -Wincomplete-uni-patterns
@@ -60,7 +63,6 @@ executable hmm
   import: shared
   build-depends:
     optparse-applicative,
-    directory,
     hmm
   ghc-options:
     -Wall
@@ -94,3 +96,35 @@ executable game-server
   main-is: Main.hs
   hs-source-dirs:
     game-server
+
+test-suite hmm-test
+  import: shared
+  ghc-options:
+    -Wall
+    -threaded
+    -rtsopts
+    -with-rtsopts=-N
+    -Wincomplete-uni-patterns
+    -Wincomplete-record-updates
+    -Wcompat
+    -Widentities
+    -Wredundant-constraints
+    -fhide-source-paths
+    -Wmissing-export-lists
+    -Wpartial-fields
+    -Wmissing-home-modules
+    -- delegate to tasty to discover tests
+    -fno-warn-missing-export-lists
+  type: exitcode-stdio-1.0
+  build-depends:
+    hmm,
+    tasty,
+    tasty-expected-failure,
+    hedgehog,
+    tasty-hedgehog,
+    doctest
+  build-tool-depends: tasty-discover:tasty-discover
+  other-modules:
+    Game.ExampleTest
+  hs-source-dirs: test
+  main-is: Driver.hs

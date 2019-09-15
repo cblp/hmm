@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE ConstraintKinds            #-}
 {-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE FlexibleInstances          #-}
@@ -13,7 +13,7 @@ module Game
   , module Game.Image
   , module Game.FPS
   , module Game.Animation
-  , module Game.Data
+  , module Game.TiledMap
   , module Game.Config
   , module Game.Env
   , Game(..)
@@ -33,7 +33,7 @@ import Game.Config (Config)
 import Game.Image (Image, ImageInfo)
 import Game.FPS (FPS)
 import Game.Animation (Animation)
-import Game.Data (TiledMap)
+import Game.TiledMap (TiledMap)
 import Game.Env (Env(..), newEnv)
 
 newtype Game a = Game

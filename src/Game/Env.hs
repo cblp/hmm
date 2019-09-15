@@ -6,9 +6,13 @@
 {-# LANGUAGE TemplateHaskell       #-}
 
 module Game.Env
-  ( Env(..)
+  ( -- * The @Env@ type
+    Env(..)
+    -- * Operations
   , newEnv
+    -- * Lenses
   , logger
+  , assets
   , currentLevel
   , config
   ) where
@@ -21,6 +25,8 @@ import Colog (HasLog, LogAction, Message, cmapM, defaultFieldMap,
               fmtRichMessageDefault, getLogAction, liftLogIO, logTextStdout,
               setLogAction, upgradeMessageAction)
 
+import Game.Assets (Assets)
+import qualified Game.Assets as Assets
 import Game.Config (Config)
 import Game.Level (Level)
 
@@ -30,6 +36,8 @@ import Game.Level (Level)
 data Env m = Env
   { -- | A `LogAction` to be used by the `co-log` package.
     _logger :: !(LogAction m Message)
+    -- | Shared assets that are not specific to any level.
+  , _assets :: !Assets
     -- | Reference to a current level.
   , _currentLevel :: !(IORef Level)
     -- | Game configuration options.
@@ -60,4 +68,5 @@ newEnv logTextFile _config startLevel = do
     logFull = upgradeMessageAction defaultFieldMap logRich
     _logger = liftLogIO logFull
   _currentLevel <- newIORef startLevel
+  _assets <- Assets.loadShared
   return Env{..}

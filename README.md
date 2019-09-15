@@ -44,7 +44,7 @@ There are a few CLI options to play with.
 For example:
 
 ```sh
-cabal new-exec -- -w 800 -h 600 -l level1
+cabal new-exec -- -w 800 -h 600 -l level-1
 ```
 
 ## Contributing

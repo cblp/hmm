@@ -1,15 +1,17 @@
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE PatternSynonyms  #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE LambdaCase            #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE MultiWayIf #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE MultiWayIf            #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE PatternSynonyms       #-}
+{-# LANGUAGE RecordWildCards       #-}
+{-# LANGUAGE TypeFamilies          #-}
 
 -- import System.Random
 -- import Control.Monad
 -- import Graphics.Gloss.Data.Bitmap
+import Prelude hiding (log)
 import Apecs
 import Apecs.Gloss as G
 import Game.World
@@ -27,7 +29,6 @@ import Game.Env (config, currentLevel)
 import qualified CLI
 
 import Colog (pattern I, withLogTextFile, log)
-import Options.Applicative (execParser)
 import System.Directory (createDirectoryIfMissing)
 
 -- type Kinetic = (Position, Velocity)
@@ -45,14 +46,18 @@ main = do
 
 game :: MonadGame m => m ()
 game = do
+  log I "starting game"
   cfg <- view config
   liftIO $ do
-    car <- Image.load "assets/car.jpg" JPG
+    car <- Image.load "assets/images/test/car.jpg" JPG
     w <- initWorld
     runWith w $ do
       initialize car
-      let window = InWindow "Haskell Micro Machines" (cfg ^. width, cfg ^. height) (10, 10)
+      let title = "Haskell Micro Machines"
+      let size = (cfg ^. width, cfg ^. height)
+      let window = InWindow title size (10, 10)
       play window black 60 draw handleEvent step
+  log I "exiting game"
 
 initialize :: Picture ->  System' ()
 initialize pic = do

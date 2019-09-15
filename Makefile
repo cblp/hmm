@@ -6,6 +6,8 @@ build:
 clean:
 		rm -f .ghc.environment*
 		nix-shell --run 'cabal new-clean'
+test:
+		nix-shell --run 'cabal new-test'
 emacs:
 		nix-shell --run 'emacs . &'
 c2n:

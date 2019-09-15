@@ -54,5 +54,5 @@ usage = info (parser defaults <**> helper)
     defaults = Config
       { _width = 1000
       , _height = 800
-      , _startLevel = "test1"
+      , _startLevel = "test"
       }

@@ -1,32 +1,40 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
 
-module Game.Data.TiledMap
+module Game.TiledMap
   ( TiledMap(..)
+  , tileset
+  , tiles
+  , TiledMapInfo(..)
   , load
   ) where
 
 import Data.Maybe (fromJust)
+import Control.Lens (makeLenses)
 import Control.Exception (Exception, throw)
 import Graphics.Gloss (Picture)
 import Data.Aeson.Tiled hiding (Vector)
 import Data.Vector (Vector)
 import qualified Data.Vector as Vector
-import Game.Image (Image, ImageInfo(..))
-import qualified Game.Image as Image
-import qualified Data.Aeson.Tiled as Tiled
 import Data.Aeson.Tiled (loadTiledmap, tiledmapLayers)
+import qualified Data.Aeson.Tiled as Tiled
+
+import Game.Image (ImageInfo(..))
+import qualified Game.Image as Image
 
 -- | Represents a tiled map.
 data TiledMap = TiledMap
-  { tileset :: Picture
-  , tiles :: Vector GlobalId
+  { _tileset :: !Picture
+  , _tiles :: !(Vector GlobalId)
   }
 
+makeLenses ''TiledMap
+
 data TiledMapInfo = TiledMapInfo
-  { jsonPath :: FilePath
-  , tilesetImage :: ImageInfo
+  { jsonPath :: !FilePath
+  , tilesetImage :: !ImageInfo
   }
 
 newtype TiledMapLoadException = TiledMapLoadException (TiledMapInfo, String)
@@ -38,9 +46,9 @@ instance Show TiledMapLoadException where
 
 load :: TiledMapInfo -> IO TiledMap
 load info@TiledMapInfo{..} = do
-  tileset <- Image.loadInfo tilesetImage
-  tiledmap <- loadTiledmap jsonPath
-  let tiles = mkTiles $ either err id tiledmap
+  _tileset <- Image.loadInfo tilesetImage
+  tiledMap <- loadTiledmap jsonPath
+  let _tiles = mkTiles $ either err id tiledMap
   return TiledMap{..}
   where
     err msg = throw $ TiledMapLoadException (info, msg)
