@@ -158,7 +158,7 @@ incrTime dT = modify global $ \(Time t) -> Time (t + dT)
 cameraFollowsThePlayer :: System' ()
 cameraFollowsThePlayer =
   cmapM_ $ \(Player, Position p) ->
-    modify global $ \(Camera _ s) -> Camera p s
+    modify global $ \camera -> camera{camOffset = p}
 
 acceleration :: Float
 acceleration = 100
