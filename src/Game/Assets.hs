@@ -95,7 +95,6 @@ instance AssetStuff Picture where
 loadSharedAssets :: (WithLog env Message m, MonadIO m) => m Assets
 loadSharedAssets = do
   log D "loading shared assets..."
-  Assets
     <$> loadAssetMap Shared Sounds
     <*> loadAssetMap Shared Music
     <*> loadAssetMap Shared Pictures
@@ -112,22 +111,6 @@ loadLevelAssets levelName = do
 loadAssetMap
   :: (WithLog env Message m, MonadIO m, AssetStuff a)
   => AssetSource
-  -> AssetType
-  -> m (AssetMap a)
-loadAssetMap src typ = do
-  let path = assetsDir src typ
-  assetPaths <- liftIO $ getDirectoryContents path
-  let assetFiles = filter (ext `isExtensionOf`) assetPaths
-  liftIO $ print $ show assetFiles
-  fmap HashMap.fromList $ for assetFiles $ \fp -> do
-    log D $ mappend "loading " $ Text.pack (path </> fp)
-    asset <- liftIO $ loadAsset $ path </> fp
-    pure (Text.pack $ dropExtension fp, asset)
-  -- TODO: Load each asset depending on the `AssetType` given
-  where
-   ext = assetTypeExt typ
-
-assetsDir :: AssetSource -> AssetType -> FilePath
 assetsDir src typ = sourcePath src </> assetTypeName typ
 
 assetTypeName :: AssetType -> String
