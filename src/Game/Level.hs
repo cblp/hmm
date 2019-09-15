@@ -15,7 +15,6 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Control.Lens (makeLenses)
 import qualified Data.HashMap.Strict as HashMap
-import System.FilePath (FilePath, (</>), (<.>))
 
 import Game.Image (Image(..), ImageInfo(..))
 import Game.TiledMap (TiledMap(..), TiledMapInfo(..))
