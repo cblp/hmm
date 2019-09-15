@@ -29,7 +29,10 @@ common shared
     transformers,
     mtl,
     lens,
-    natural-transformation
+    natural-transformation,
+    sdl2,
+    sdl2-mixer,
+    data-default-class
   default-language: Haskell2010
 
 library

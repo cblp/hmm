@@ -25,6 +25,7 @@ module Game.Assets
   ) where
 
 import Prelude hiding (log)
+import Data.Traversable (for)
 import Data.Text (Text)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Trans (liftIO)
@@ -34,16 +35,19 @@ import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Graphics.Gloss.Data.Picture (Picture)
 import System.Directory (getDirectoryContents)
-import System.FilePath (FilePath, (</>), isExtensionOf)
+import System.FilePath (FilePath, (</>), isExtensionOf, dropExtension)
 import Colog (WithLog, Message, pattern D, log)
+import qualified SDL.Mixer as SDL
 
 import qualified Game.Audio as Audio
+import qualified Game.Image as Image
 
 -- | Represents the asset source to load the `AssetMap` from
 -- (can be shared or level-specific).
 data AssetSource
   = Shared
   | Level Text
+  deriving (Show)
 
 -- | Supported game asset types.
 data AssetType
@@ -51,14 +55,15 @@ data AssetType
   | Music
   | Pictures
   | Maps
+  deriving (Show)
 
 type AssetMap a = HashMap Text a
 
 data Assets = Assets
-  { _sounds   :: AssetMap Audio.Sound
-  , _music    :: AssetMap Audio.Music
+  { _sounds :: AssetMap SDL.Chunk
+  , _music :: AssetMap SDL.Music
   , _pictures :: AssetMap Picture
-  }
+  } deriving (Show)
 
 makeLenses ''Assets
 
@@ -71,41 +76,54 @@ instance Semigroup Assets where
 instance Monoid Assets where
   mempty = Assets mempty mempty mempty
 
+class AssetStuff a where
+  loadAsset :: FilePath -> IO a
+
+instance AssetStuff SDL.Chunk where
+  loadAsset fp =
+    SDL.load fp
+
+instance AssetStuff SDL.Music where
+  loadAsset fp =
+    error "TODO: loadAsset Music"
+
+instance AssetStuff Picture where
+  loadAsset fp =
+    Image.load fp Image.PNG
+
 -- | Loads game shared (global) assets.
 loadSharedAssets :: (WithLog env Message m, MonadIO m) => m Assets
 loadSharedAssets = do
   log D "loading shared assets..."
   Assets
-    <$> load Sounds
-    <*> load Music
-    <*> load Pictures
-  where
-    load = loadAssetMap Shared
+    <$> loadAssetMap Shared Sounds
+    <*> loadAssetMap Shared Music
+    <*> loadAssetMap Shared Pictures
 
 -- | Loads level assets.
 loadLevelAssets :: (WithLog env Message m, MonadIO m) => Text -> m Assets
 loadLevelAssets levelName = do
   log D $ "loading " <> levelName <> " level assets..."
   Assets
-    <$> load Sounds
-    <*> load Music
-    <*> load Pictures
-  where
-    load = loadAssetMap $ Level levelName
+    <$> loadAssetMap (Level levelName) Sounds
+    <*> loadAssetMap (Level levelName) Music
+    <*> loadAssetMap (Level levelName) Pictures
 
 loadAssetMap
-  :: (WithLog env Message m, MonadIO m)
+  :: (WithLog env Message m, MonadIO m, AssetStuff a)
   => AssetSource
   -> AssetType
   -> m (AssetMap a)
 loadAssetMap src typ = do
-  let dirPath = assetsDir src typ
-  log D $ "loading: " <> Text.pack dirPath
-  assetPaths <- liftIO $ getDirectoryContents dirPath
+  let path = assetsDir src typ
+  assetPaths <- liftIO $ getDirectoryContents path
   let assetFiles = filter (ext `isExtensionOf`) assetPaths
   liftIO $ print $ show assetFiles
+  fmap HashMap.fromList $ for assetFiles $ \fp -> do
+    log D $ mappend "loading " $ Text.pack (path </> fp)
+    asset <- liftIO $ loadAsset $ path </> fp
+    pure (Text.pack $ dropExtension fp, asset)
   -- TODO: Load each asset depending on the `AssetType` given
-  return HashMap.empty
   where
    ext = assetTypeExt typ
 
