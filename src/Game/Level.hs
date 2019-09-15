@@ -1,5 +1,7 @@
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE NamedFieldPuns    #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms   #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
@@ -11,15 +13,18 @@ module Game.Level
   , load
   ) where
 
+import Prelude hiding (log)
 import Data.Text (Text)
-import qualified Data.Text as Text
 import Control.Lens (makeLenses)
-import qualified Data.HashMap.Strict as HashMap
+import Control.Monad.IO.Class (MonadIO)
+import System.FilePath ((</>), (<.>))
+import Colog (WithLog, Message)
 
 import Game.Image (Image(..), ImageInfo(..))
 import Game.TiledMap (TiledMap(..), TiledMapInfo(..))
 import qualified Game.TiledMap as TiledMap
-import Game.Assets (Assets(..))
+import qualified Game.Assets as Assets
+import Game.Assets (Assets(..), assetsDir, loadLevelAssets)
 
 data Level = Level
   { _name :: Text
@@ -29,26 +34,18 @@ data Level = Level
 
 makeLenses ''Level
 
-load :: Text -> IO Level
-load _name = do
-  _assets <- loadAssets _name
-  _tiledMap <- loadTiledMap _name
-  return Level{..}
+load :: (WithLog env Message m, MonadIO m) => Text -> m Level
+load n = Level
+  <$> pure n
+  <*> loadLevelAssets n
+  <*> loadTiledMap n
 
-loadAssets :: Text -> IO Assets
-loadAssets _ = do
-  let
-    _sfxs = HashMap.empty
-    _soundtracks = HashMap.empty
-    _pictures = HashMap.empty
-  return Assets{..}
-
-loadTiledMap :: Text -> IO TiledMap
+loadTiledMap :: MonadIO m => Text -> m TiledMap
 loadTiledMap levelName = do
-  let imagePath = Text.unpack $ mapsPath <> "tileset.png"
-      imageType = PNG
-      tilesetImage = ImageInfo { imagePath, imageType }
-      jsonPath = Text.unpack $ mapsPath <> "map.json"
+  let
+    imagePath = mapsDir </> "tileset" <.> "png"
+    tilesetImage = ImageInfo { imagePath, imageType = PNG }
+    jsonPath = mapsDir </> "map" <.> "json"
   TiledMap.load $ TiledMapInfo { jsonPath, tilesetImage }
   where
-    mapsPath = "assets/levels/" <> levelName <> "/maps/"
+    mapsDir = assetsDir (Assets.Level levelName) Assets.Maps
