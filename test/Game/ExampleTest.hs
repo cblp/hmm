@@ -1,10 +1,11 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase                 #-}
 
-module Game.AssetsTest where
+module Game.ExampleTest where
 
 import Prelude hiding (Product)
 
+import Control.Monad (guard)
 import qualified Data.List as List
 import qualified Data.Text as Text
 

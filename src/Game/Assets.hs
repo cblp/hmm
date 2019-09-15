@@ -46,6 +46,7 @@ assetTypeDir = \case
 data AssetSource
   = Shared
   | Level Text
+
 type AssetMap = HashMap Text
 
 data Assets = Assets
