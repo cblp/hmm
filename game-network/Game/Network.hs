@@ -33,8 +33,7 @@ createServerSocket port = do
 createClientSocket :: IO Socket
 createClientSocket = do
     addr <- head <$> getAddrInfo Nothing Nothing (Just "8080")
-    sock <- socket (addrFamily addr) Datagram defaultProtocol
-    pure sock
+    socket (addrFamily addr) Datagram defaultProtocol
 
 buildSockAddr :: String -> Int -> IO SockAddr
 buildSockAddr host port = do
@@ -51,8 +50,7 @@ receiveMessage :: Socket -> IO (Message, SockAddr)
 receiveMessage sock = do
     (bytes, addr) <- recvFrom sock chunkSize
     print $ "raw bytes: " <> bytes
-    pure $ (parseMessage bytes, addr)
+    pure (parseMessage bytes, addr)
 
 sendMessage :: Socket -> Message -> SockAddr -> IO ()
 sendMessage sock msg = sendAllTo sock $ unparseMessage msg
-
