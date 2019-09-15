@@ -13,20 +13,26 @@ import Apecs.Gloss as G
 import Linear
 import System.Exit
 import Colog (pattern I, withLogTextFile, log)
-import Control.Concurrent (putMVar)
+import Control.Concurrent (putMVar, readMVar)
 import Control.Monad.Reader (ask)
 import Control.Lens
+import Data.Default.Class (def)
+import System.Directory (createDirectoryIfMissing)
 
-import Game (Game, MonadGame, newEnv, runGame)
+import qualified Data.HashMap.Strict as HM
+import qualified SDL
+import qualified SDL.Mixer as Mix
+
+import Game (Game, MonadGame, newEnv, runGame, _assets)
 import Game.World
 import Game.Assets (loadSharedAssets)
+import qualified Game.Assets as Assets
 import qualified Game.Image as Image
 import qualified Game.Level as Level
 import Game.Image (Image(..))
 import Game.Config (width, height, startLevel)
 import Game.Env (Env, assets, config, currentLevel)
 import qualified CLI
-import System.Directory (createDirectoryIfMissing)
 
 -- type Kinetic = (Position, Velocity)
 
@@ -37,13 +43,24 @@ main = do
       logPath = logsDir <> "/hmm.log"
   createDirectoryIfMissing True logsDir
   withLogTextFile logPath $ \logger -> do
-    env <- newEnv logger cfg
-    runGame env game
+    SDL.initialize [SDL.InitAudio]
+    Mix.withAudio def 256 $ do
+      Mix.setChannels 32 -- 128 max
+      Mix.whenChannelFinished $ \c ->
+        putStrLn $ show c <> " finished playing!"
+
+      env <- newEnv logger cfg
+      runGame env game
+    SDL.quit
 
 game :: MonadGame m => m ()
 game = do
   log I "starting game"
+
   cfg <- view config
+  let title = "Haskell Micro Machines"
+  let size = (cfg ^. width, cfg ^. height)
+  let window = InWindow title size (10, 10)
 
   sharedAssets <- loadSharedAssets
   view assets >>= liftIO . flip putMVar sharedAssets
@@ -64,10 +81,7 @@ game = do
       , newCar carGreen2 $ Position (V2 100 0)
       , newCar carYellow3 $ Position (V2 0 100)
       ]
-    let title = "Haskell Micro Machines"
-    let size = (cfg ^. width, cfg ^. height)
-    let window = InWindow title size (10, 10)
-    play window black 60 (draw env) handleEvent step
+    play window black 60 (draw env) (handleEvent env) step
   log I "exiting game"
 
 initPlayer :: Picture -> System' Entity
@@ -108,19 +122,35 @@ line' (V2 x y) = line [(0, 0), (x, y)]
 scale' :: Float -> Picture -> Picture
 scale' factor = scale factor factor
 
-handleEvent :: Event -> System' ()
-handleEvent =
-  \case
-    EventKey (SpecialKey KeyUp) state _ _ ->
-      cmap $ \Player -> AcceleratePedal (state == Down)
-    EventKey (SpecialKey KeyDown) state _ _ ->
-      cmap $ \Player -> BrakePedal (state == Down)
-    EventKey (SpecialKey KeyLeft) state _ _ ->
-      cmap $ \Player -> SteerLeft (state == Down)
-    EventKey (SpecialKey KeyRight) state _ _ ->
-      cmap $ \Player -> SteerRight (state == Down)
-    EventKey (SpecialKey KeyEsc) Down _ _ -> liftIO exitSuccess
-    _ -> pure ()
+handleEvent :: Env Game -> Event -> System' ()
+handleEvent env = \case
+  EventKey (SpecialKey KeyUp) state _ _ ->
+    cmap $ \Player -> AcceleratePedal (state == Down)
+
+  EventKey (SpecialKey KeyDown) state _ _ -> do
+    cmap $ \Player -> BrakePedal (state == Down)
+    if state == Down then do
+      assets <- liftIO . readMVar $ env ^. assets
+      let sfx = Assets._sounds assets
+      case HM.lookup "tires" sfx of
+        Just chunk ->
+          Mix.fadeIn 200 chunk
+        Nothing ->
+          error $ mappend "tires not found in " . show $ HM.keys sfx
+    else
+      Mix.fadeOut 100 Mix.AllChannels
+
+  EventKey (SpecialKey KeyLeft) state _ _ ->
+    cmap $ \Player -> SteerLeft (state == Down)
+
+  EventKey (SpecialKey KeyRight) state _ _ ->
+    cmap $ \Player -> SteerRight (state == Down)
+
+  EventKey (SpecialKey KeyEsc) Down _ _ ->
+    liftIO exitSuccess
+
+  _ ->
+    pure ()
 
 step :: Float -> System' ()
 step dT = do

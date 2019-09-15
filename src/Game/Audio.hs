@@ -1,7 +1,10 @@
 module Game.Audio
-  ( Sound(..)
-  , Music(..)
+  ( Sound
+  , Music
   ) where
 
-data Sound = Sound
-data Music = Music
+import qualified SDL.Mixer as SDL
+
+type Sound = SDL.Chunk
+
+type Music = SDL.Music
