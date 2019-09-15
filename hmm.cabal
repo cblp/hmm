@@ -124,7 +124,5 @@ test-suite hmm-test
     tasty-hedgehog,
     doctest
   build-tool-depends: tasty-discover:tasty-discover
-  other-modules:
-    Game.ExampleTest
   hs-source-dirs: test
   main-is: Driver.hs
