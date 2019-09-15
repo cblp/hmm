@@ -23,3 +23,12 @@
 [92m[Debug]   [0m[15-09-2019 19:21:38.185] [Game.Assets.loadLevelAssets#88] [ThreadId 11] loading test level assets...
 [92m[Debug]   [0m[15-09-2019 19:21:38.185] [Game.Assets.loadAssetMap#103] [ThreadId 11] loading: assets/levels/test/sounds
 [92m[Debug]   [0m[15-09-2019 19:21:38.185] [Game.Assets.loadAssetMap#103] [ThreadId 11] loading: assets/levels/test/music
+[94m[Info]    [0m[15-09-2019 19:22:20.130] [Main.game#48] [ThreadId 11] starting game
+[92m[Debug]   [0m[15-09-2019 19:22:20.130] [Game.Assets.loadSharedAssets#77] [ThreadId 11] loading shared assets...
+[92m[Debug]   [0m[15-09-2019 19:22:20.130] [Game.Assets.loadAssetMap#103] [ThreadId 11] loading: assets/sounds
+[92m[Debug]   [0m[15-09-2019 19:22:20.131] [Game.Assets.loadAssetMap#103] [ThreadId 11] loading: assets/music
+[92m[Debug]   [0m[15-09-2019 19:22:20.131] [Game.Assets.loadAssetMap#103] [ThreadId 11] loading: assets/images
+[92m[Debug]   [0m[15-09-2019 19:22:20.131] [Game.Assets.loadLevelAssets#88] [ThreadId 11] loading test level assets...
+[92m[Debug]   [0m[15-09-2019 19:22:20.131] [Game.Assets.loadAssetMap#103] [ThreadId 11] loading: assets/levels/test/sounds
+[92m[Debug]   [0m[15-09-2019 19:22:20.131] [Game.Assets.loadAssetMap#103] [ThreadId 11] loading: assets/levels/test/music
+[92m[Debug]   [0m[15-09-2019 19:22:20.131] [Game.Assets.loadAssetMap#103] [ThreadId 11] loading: assets/levels/test/images
