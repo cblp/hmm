@@ -14,6 +14,8 @@ module Game.TiledMap
 import Data.Maybe (fromJust)
 import Control.Lens (makeLenses)
 import Control.Exception (Exception, throw)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Trans (liftIO)
 import Graphics.Gloss (Picture)
 import Data.Aeson.Tiled hiding (Vector)
 import Data.Vector (Vector)
@@ -44,10 +46,10 @@ instance Show TiledMapLoadException where
   show (TiledMapLoadException (TiledMapInfo{..}, msg)) =
     unlines [ "Failed to load tiled map: " <> jsonPath, msg ]
 
-load :: TiledMapInfo -> IO TiledMap
+load :: MonadIO m => TiledMapInfo -> m TiledMap
 load info@TiledMapInfo{..} = do
   _tileset <- Image.loadInfo tilesetImage
-  tiledMap <- loadTiledmap jsonPath
+  tiledMap <- liftIO $ loadTiledmap jsonPath
   let _tiles = mkTiles $ either err id tiledMap
   return TiledMap{..}
   where

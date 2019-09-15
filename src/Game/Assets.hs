@@ -1,10 +1,10 @@
+{-# LANGUAGE DerivingVia       #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms   #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TemplateHaskell   #-}
-{-# LANGUAGE DerivingVia       #-}
 
 module Game.Assets
   ( Assets(..)
@@ -16,8 +16,12 @@ module Game.Assets
   , music
   , pictures
     -- * Operations
-  , loadShared
-  , loadSource
+  , loadSharedAssets
+  , loadLevelAssets
+  , loadAssetMap
+  , assetsDir
+  , sourcePath
+  , rootPath
   ) where
 
 import Prelude hiding (log)
@@ -39,19 +43,20 @@ import qualified Game.Audio as Audio
 -- (can be shared or level-specific).
 data AssetSource
   = Shared
-  | Level String
+  | Level Text
 
 -- | Supported game asset types.
 data AssetType
   = Sounds
   | Music
   | Pictures
+  | Maps
 
 type AssetMap a = HashMap Text a
 
 data Assets = Assets
-  { _sounds :: AssetMap Audio.Sound
-  , _music :: AssetMap Audio.Music
+  { _sounds   :: AssetMap Audio.Sound
+  , _music    :: AssetMap Audio.Music
   , _pictures :: AssetMap Picture
   }
 
@@ -67,25 +72,36 @@ instance Monoid Assets where
   mempty = Assets mempty mempty mempty
 
 -- | Loads game shared (global) assets.
-loadShared :: (WithLog env Message m, MonadIO m) => m Assets
-loadShared = do
-  log D "loading assets"
+loadSharedAssets :: (WithLog env Message m, MonadIO m) => m Assets
+loadSharedAssets = do
+  log D "loading shared assets..."
   Assets
     <$> load Sounds
     <*> load Music
     <*> load Pictures
   where
-    load = loadSource Shared
+    load = loadAssetMap Shared
 
-loadSource
+-- | Loads level assets.
+loadLevelAssets :: (WithLog env Message m, MonadIO m) => Text -> m Assets
+loadLevelAssets levelName = do
+  log D $ "loading " <> levelName <> " level assets..."
+  Assets
+    <$> load Sounds
+    <*> load Music
+    <*> load Pictures
+  where
+    load = loadAssetMap $ Level levelName
+
+loadAssetMap
   :: (WithLog env Message m, MonadIO m)
   => AssetSource
   -> AssetType
   -> m (AssetMap a)
-loadSource src typ = do
-  let path = mkPath src typ
-  log D $ "loading " <> Text.pack (assetSourceName src) <> " : " <> Text.pack path
-  assetPaths <- liftIO $ getDirectoryContents path
+loadAssetMap src typ = do
+  let dirPath = assetsDir src typ
+  log D $ "loading: " <> Text.pack dirPath
+  assetPaths <- liftIO $ getDirectoryContents dirPath
   let assetFiles = filter (ext `isExtensionOf`) assetPaths
   liftIO $ print $ show assetFiles
   -- TODO: Load each asset depending on the `AssetType` given
@@ -93,31 +109,27 @@ loadSource src typ = do
   where
    ext = assetTypeExt typ
 
-mkPath :: AssetSource -> AssetType -> FilePath
-mkPath src typ = sourcePath src </> assetTypeName typ
-
-assetSourceName :: AssetSource -> String
-assetSourceName = \case
-  Shared -> "shared"
-  Level name -> "level " <> name
+assetsDir :: AssetSource -> AssetType -> FilePath
+assetsDir src typ = sourcePath src </> assetTypeName typ
 
 assetTypeName :: AssetType -> String
 assetTypeName = \case
-  Sounds -> "sounds"
-  Music -> "music"
+  Sounds   -> "sounds"
+  Music    -> "music"
   Pictures -> "images"
+  Maps     -> "maps"
 
 assetTypeExt :: AssetType -> String
 assetTypeExt = \case
-  Sounds -> ".wav"
-  Music -> ".mp3"
-  Pictures -> ".png"
-
+  Sounds   -> "wav"
+  Music    -> "mp3"
+  Pictures -> "png"
+  Maps     -> "json"
 
 -- | Assets source path (shared or level-specific).
 sourcePath :: AssetSource -> FilePath
 sourcePath Shared       = rootPath
-sourcePath (Level name) = rootPath </> "levels" </> name
+sourcePath (Level name) = rootPath </> "levels" </> Text.unpack name
 
 -- | Assets root directory.
 rootPath :: FilePath

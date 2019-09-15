@@ -16,17 +16,18 @@ import Apecs.Gloss as G
 import Linear
 import System.Exit
 import Colog (pattern I, withLogTextFile, log)
+import Control.Concurrent (putMVar)
 import Control.Monad.Reader (runReaderT, ask, lift)
 import Control.Lens
 
 import Game (Game, MonadGame, newEnv, runGame)
 import Game.World
-import qualified Game.Assets as Assets
+import Game.Assets (loadSharedAssets)
 import qualified Game.Image as Image
 import qualified Game.Level as Level
 import Game.Image (Image(..))
 import Game.Config (width, height, startLevel)
-import Game.Env (Env, config)
+import Game.Env (Env, assets, config, currentLevel)
 import qualified CLI
 import System.Directory (createDirectoryIfMissing)
 
@@ -39,21 +40,26 @@ main = do
       logPath = logsDir <> "/hmm.log"
   createDirectoryIfMissing True logsDir
   withLogTextFile logPath $ \logger -> do
-    lvl <- Level.load $ cfg ^. startLevel
-    env <- newEnv logger cfg lvl
+    env <- newEnv logger cfg
     runGame env game
 
 game :: MonadGame m => m ()
 game = do
   log I "starting game"
-  x <- Assets.loadShared
   cfg <- view config
+
+  sharedAssets <- loadSharedAssets
+  view assets >>= liftIO . flip putMVar sharedAssets
+
+  lvl <- Level.load $ cfg ^. startLevel
+  view currentLevel >>= liftIO . flip putMVar lvl
 
   carRed1 <- liftIO $ Image.load "assets/images/vehicles/car_red_1.png" PNG
   carGreen2 <- liftIO $ Image.load "assets/images/vehicles/car_green_2.png" PNG
   carYellow3 <- liftIO $ Image.load "assets/images/vehicles/car_yellow_3.png" PNG
 
   world <- liftIO initWorld
+
   env <- ask
   liftIO $ runWith world $ do
     sequence_

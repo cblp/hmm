@@ -10,6 +10,8 @@ module Game.Image
 
 import Data.Maybe (fromMaybe)
 import Control.Exception (Exception, throw)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Trans (liftIO)
 import Graphics.Gloss.Data.Bitmap (loadBMP)
 import Graphics.Gloss.Data.Picture (Picture)
 import Graphics.Gloss.Juicy (loadJuicyJPG, loadJuicyPNG)
@@ -37,16 +39,16 @@ instance Show ImageLoadException where
     ]
 
 -- | Loads image using given file path and type.
-load :: FilePath -> Image -> IO Picture
-load imagePath imageType = loadInfo ImageInfo{..}
+load :: MonadIO m => FilePath -> Image -> m Picture
+load imagePath imageType = loadInfo $ ImageInfo{..}
 
-loadInfo :: ImageInfo -> IO Picture
+loadInfo :: MonadIO m => ImageInfo -> m Picture
 loadInfo info@ImageInfo{..} = case imageType of
-  BMP -> loadBMP imagePath
+  BMP -> liftIO $ loadBMP imagePath
   PNG -> loadWith loadJuicyPNG
   JPG -> loadWith loadJuicyJPG
   where
-    loadWith :: (FilePath -> IO (Maybe Picture)) -> IO Picture
+    loadWith :: MonadIO m => (FilePath -> IO (Maybe Picture)) -> m Picture
     loadWith loader = do
-      pic <- loader imagePath
+      pic <- liftIO $ loader imagePath
       return $ fromMaybe (throw $ ImageLoadException info) pic
