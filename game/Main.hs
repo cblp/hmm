@@ -11,7 +11,7 @@
 -- import Control.Monad
 -- import Graphics.Gloss.Data.Bitmap
 import Prelude hiding (log)
-import Apecs (global, modify, cmap, cmapM_, liftIO, newEntity, runWith)
+import Apecs (Entity, global, modify, cmap, cmapM_, liftIO, newEntity, runWith)
 import Apecs.Gloss as G
 import Linear
 import System.Exit
@@ -48,45 +48,45 @@ game = do
   log I "starting game"
   x <- Assets.loadShared
   cfg <- view config
-  car <- liftIO $ Image.load "assets/images/test/car.jpg" JPG
+
+  carRed1 <- liftIO $ Image.load "assets/images/vehicles/car_red_1.png" PNG
+  carGreen2 <- liftIO $ Image.load "assets/images/vehicles/car_green_2.png" PNG
+  carYellow3 <- liftIO $ Image.load "assets/images/vehicles/car_yellow_3.png" PNG
+
   world <- liftIO initWorld
   env <- ask
   liftIO $ runWith world $ do
-    initialize car
+    sequence_
+      [ initPlayer carRed1
+      , newCar carGreen2 $ Position (V2 100 0)
+      , newCar carYellow3 $ Position (V2 0 100)
+      ]
     let title = "Haskell Micro Machines"
     let size = (cfg ^. width, cfg ^. height)
     let window = InWindow title size (10, 10)
     play window black 60 (draw env) handleEvent step
   log I "exiting game"
 
-initialize :: Picture ->  System' ()
-initialize pic = do
-  _enemy1 <-
-    newEntity
-      ( Machine
-      , Position (V2 50 50)
-      , Velocity 0
-      , Direction (pi/4)
-      , Skin pic
-      )
-  _enemy2 <-
-    newEntity
-      ( Machine
-      , Position (V2 (-50) (-50))
-      , Velocity 0
-      , Direction (pi/2)
-      , Skin pic)
-  _player <-
-    newEntity
-      ( Player
-      , Machine
-      , (Position 0, Velocity 0)
-      , (AcceleratePedal False, BrakePedal False)
-      , Direction (pi/2)
-      , Skin pic
-      , (SteerLeft False, SteerRight False)
-      )
-  pure ()
+initPlayer :: Picture -> System' Entity
+initPlayer pic = newEntity
+  ( Player
+  , Machine
+  , (Position 0, Velocity 0)
+  , (AcceleratePedal False, BrakePedal False)
+  , Direction (pi/2)
+  , Skin pic
+  , (SteerLeft False, SteerRight False)
+  )
+
+newCar :: Picture -> Position -> System' Entity
+newCar pic pos =
+  newEntity
+    ( Machine
+    , pos
+    , Velocity 0
+    , Direction (pi/4)
+    , Skin pic
+    )
 
 draw :: Env Game -> System' Picture
 draw = runReaderT $ do
@@ -94,7 +94,7 @@ draw = runReaderT $ do
     \(Machine, pos, Skin skin, Direction a, Velocity v) ->
       translatePos pos
       $ mconcat
-          [ scale' 0.1 $ G.rotate (-a*180/pi + 90) skin
+          [ scale' 0.5 $ G.rotate (-a*180/pi + 90) skin
           , scale' 100 $ color red $ line' $ angle a
           , color blue $ line' v
           ]
