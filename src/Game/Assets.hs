@@ -24,10 +24,9 @@ import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Graphics.Gloss.Data.Picture (Picture)
 import System.Directory (getDirectoryContents)
-import System.FilePath (FilePath, (</>), (<.>))
+import System.FilePath (FilePath, (</>))
 
 import Game.Sound (Sfx, Soundtrack)
-import Game.Animation (Animation)
 
 -- | Supported game asset types.
 data AssetType
