@@ -7,9 +7,6 @@
 {-# LANGUAGE PatternSynonyms       #-}
 {-# LANGUAGE TypeFamilies          #-}
 
--- import System.Random
--- import Control.Monad
--- import Graphics.Gloss.Data.Bitmap
 import Prelude hiding (log)
 import Apecs (Entity, global, modify, cmap, cmapM_, liftIO, newEntity, runWith)
 import Apecs.Gloss as G
@@ -17,7 +14,7 @@ import Linear
 import System.Exit
 import Colog (pattern I, withLogTextFile, log)
 import Control.Concurrent (putMVar)
-import Control.Monad.Reader (runReaderT, ask, lift)
+import Control.Monad.Reader (ask)
 import Control.Lens
 
 import Game (Game, MonadGame, newEnv, runGame)
@@ -95,8 +92,8 @@ newCar pic pos =
     )
 
 draw :: Env Game -> System' Picture
-draw = runReaderT $ do
-  machines <- lift . foldDraw $
+draw _ =
+  foldDraw $
     \(Machine, pos, Skin skin, Direction a, Velocity v) ->
       translatePos pos
       $ mconcat
@@ -104,7 +101,6 @@ draw = runReaderT $ do
           , scale' 100 $ color red $ line' $ angle a
           , color blue $ line' v
           ]
-  pure machines
 
 line' :: V2 Float -> Picture
 line' (V2 x y) = line [(0, 0), (x, y)]
