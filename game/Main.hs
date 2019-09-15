@@ -25,8 +25,8 @@ import qualified Game.Assets as Assets
 import qualified Game.Image as Image
 import qualified Game.Level as Level
 import Game.Image (Image(..))
-import Game.Config (Config, width, height, startLevel)
-import Game.Env (Env, assets, config, currentLevel)
+import Game.Config (width, height, startLevel)
+import Game.Env (Env, config)
 import qualified CLI
 import System.Directory (createDirectoryIfMissing)
 
