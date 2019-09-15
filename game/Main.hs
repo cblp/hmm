@@ -49,7 +49,7 @@ game = do
   x <- Assets.loadShared
   cfg <- view config
   car <- liftIO $ Image.load "assets/images/test/car.jpg" JPG
-  world <- liftIO $ initWorld
+  world <- liftIO initWorld
   env <- ask
   liftIO $ runWith world $ do
     initialize car
