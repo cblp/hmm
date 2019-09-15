@@ -1,0 +1,3 @@
+[94m[Info]    [0m[15-09-2019 12:38:57.576] [Main.game#49] [ThreadId 11] starting game
+[92m[Debug]   [0m[15-09-2019 12:38:57.576] [Game.Assets.loadShared#72] [ThreadId 11] loading assets
+[92m[Debug]   [0m[15-09-2019 12:38:57.576] [Game.Assets.loadSource#86] [ThreadId 11] shared : sounds

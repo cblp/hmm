@@ -61,12 +61,13 @@ newEnv
   -> Config
   -> Level
   -> IO (Env m)
-newEnv logTextFile _config startLevel = do
-  let
-    logText = logTextStdout <> logTextFile
-    logRich = cmapM fmtRichMessageDefault logText
+newEnv logTextFile config startLevel = Env
+  <$> pure logger
+  <*> pure mempty
+  <*> newIORef startLevel
+  <*> pure config
+  where
+    logger  = liftLogIO logFull
     logFull = upgradeMessageAction defaultFieldMap logRich
-    _logger = liftLogIO logFull
-  _currentLevel <- newIORef startLevel
-  _assets <- Assets.loadShared
-  return Env{..}
+    logRich = cmapM fmtRichMessageDefault logText
+    logText = logTextStdout <> logTextFile

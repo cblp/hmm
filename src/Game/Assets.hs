@@ -1,7 +1,10 @@
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms   #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE DerivingVia       #-}
 
 module Game.Assets
   ( Assets(..)
@@ -9,76 +12,113 @@ module Game.Assets
   , AssetSource(..)
   , AssetMap
     -- * Lenses
-  , sfxs
-  , soundtracks
+  , sounds
+  , music
   , pictures
     -- * Operations
   , loadShared
-  , load
+  , loadSource
   ) where
 
+import Prelude hiding (log)
 import Data.Text (Text)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Trans (liftIO)
 import qualified Data.Text as Text
 import Control.Lens (makeLenses)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Graphics.Gloss.Data.Picture (Picture)
 import System.Directory (getDirectoryContents)
-import System.FilePath (FilePath, (</>))
+import System.FilePath (FilePath, (</>), isExtensionOf)
+import Colog (WithLog, Message, pattern D, log)
 
-import Game.Sound (Sfx, Soundtrack)
-
--- | Supported game asset types.
-data AssetType
-  = Sfxs
-  | Soundtracks
-  | Images
-
-assetTypeDir :: AssetType -> FilePath
-assetTypeDir = \case
-  Sfxs -> "sfxs"
-  Soundtracks -> "soundtracks"
-  Images -> "images"
+import qualified Game.Audio as Audio
 
 -- | Represents the asset source to load the `AssetMap` from
 -- (can be shared or level-specific).
 data AssetSource
   = Shared
-  | Level Text
+  | Level String
 
-type AssetMap = HashMap Text
+-- | Supported game asset types.
+data AssetType
+  = Sounds
+  | Music
+  | Pictures
+
+type AssetMap a = HashMap Text a
 
 data Assets = Assets
-  { _sfxs :: AssetMap Sfx
-  , _soundtracks :: AssetMap Soundtrack
+  { _sounds :: AssetMap Audio.Sound
+  , _music :: AssetMap Audio.Music
   , _pictures :: AssetMap Picture
   }
 
 makeLenses ''Assets
 
--- | Loads game shared (global) assets.
-loadShared :: IO Assets
-loadShared = do
-  _sfxs <- load Shared Sfxs
-  _soundtracks <- load Shared Soundtracks
-  _pictures <- load Shared Images
-  return Assets{..}
+instance Semigroup Assets where
+  a <> b = Assets
+    (_sounds a <> _sounds b)
+    (_music a <> _music b)
+    (_pictures a <> _pictures b)
 
-load :: AssetSource -> AssetType -> IO (AssetMap a)
-load src typ = do
-  let filePath = mkPath src typ
-  dirPaths <- getDirectoryContents filePath
+instance Monoid Assets where
+  mempty = Assets mempty mempty mempty
+
+-- | Loads game shared (global) assets.
+loadShared :: (WithLog env Message m, MonadIO m) => m Assets
+loadShared = do
+  log D "loading assets"
+  Assets
+    <$> load Sounds
+    <*> load Music
+    <*> load Pictures
+  where
+    load = loadSource Shared
+
+loadSource
+  :: (WithLog env Message m, MonadIO m)
+  => AssetSource
+  -> AssetType
+  -> m (AssetMap a)
+loadSource src typ = do
+  let path = mkPath src typ
+  log D $ "loading " <> Text.pack (assetSourceName src) <> " : " <> Text.pack path
+  assetPaths <- liftIO $ getDirectoryContents path
+  let assetFiles = filter (ext `isExtensionOf`) assetPaths
+  liftIO $ print $ show assetFiles
   -- TODO: Load each asset depending on the `AssetType` given
   return HashMap.empty
+  where
+   ext = assetTypeExt typ
 
 mkPath :: AssetSource -> AssetType -> FilePath
-mkPath src typ = sourcePath src </> assetTypeDir typ
+mkPath src typ = sourcePath src </> assetTypeName typ
+
+assetSourceName :: AssetSource -> String
+assetSourceName = \case
+  Shared -> "shared"
+  Level name -> "level " <> name
+
+assetTypeName :: AssetType -> String
+assetTypeName = \case
+  Sounds -> "sounds"
+  Music -> "music"
+  Pictures -> "images"
+
+assetTypeExt :: AssetType -> String
+assetTypeExt = \case
+  Sounds -> ".wav"
+  Music -> ".mp3"
+  Pictures -> ".png"
+
+
+-- | Assets source path (shared or level-specific).
+sourcePath :: AssetSource -> FilePath
+sourcePath Shared       = rootPath
+sourcePath (Level name) = rootPath </> "levels" </> name
 
 -- | Assets root directory.
 rootPath :: FilePath
 rootPath = "assets"
-
--- | Assets source path (shared or level-specific).
-sourcePath :: AssetSource -> FilePath
-sourcePath Shared = rootPath
-sourcePath (Level name) = rootPath </> "levels" </> Text.unpack name

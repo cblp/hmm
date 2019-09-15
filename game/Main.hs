@@ -11,23 +11,23 @@
 -- import Control.Monad
 -- import Graphics.Gloss.Data.Bitmap
 import Prelude hiding (log)
-import Apecs
+import Apecs (global, modify, cmap, cmapM_, liftIO, newEntity, runWith)
 import Apecs.Gloss as G
-import Game.World
 import Linear
 import System.Exit
-import Control.Lens ((^.), view)
+import Colog (pattern I, withLogTextFile, log)
+import Control.Monad.Reader (runReaderT, ask, lift)
+import Control.Lens
 
-import Game (MonadGame, newEnv, runGame)
+import Game (Game, MonadGame, newEnv, runGame)
+import Game.World
+import qualified Game.Assets as Assets
 import qualified Game.Image as Image
 import qualified Game.Level as Level
 import Game.Image (Image(..))
 import Game.Config (Config, width, height, startLevel)
-import Game.Env (config, currentLevel)
-
+import Game.Env (Env, assets, config, currentLevel)
 import qualified CLI
-
-import Colog (pattern I, withLogTextFile, log)
 import System.Directory (createDirectoryIfMissing)
 
 -- type Kinetic = (Position, Velocity)
@@ -46,16 +46,17 @@ main = do
 game :: MonadGame m => m ()
 game = do
   log I "starting game"
+  x <- Assets.loadShared
   cfg <- view config
-  liftIO $ do
-    car <- Image.load "assets/images/test/car.jpg" JPG
-    w <- initWorld
-    runWith w $ do
-      initialize car
-      let title = "Haskell Micro Machines"
-      let size = (cfg ^. width, cfg ^. height)
-      let window = InWindow title size (10, 10)
-      play window black 60 draw handleEvent step
+  car <- liftIO $ Image.load "assets/images/test/car.jpg" JPG
+  world <- liftIO $ initWorld
+  env <- ask
+  liftIO $ runWith world $ do
+    initialize car
+    let title = "Haskell Micro Machines"
+    let size = (cfg ^. width, cfg ^. height)
+    let window = InWindow title size (10, 10)
+    play window black 60 (draw env) handleEvent step
   log I "exiting game"
 
 initialize :: Picture ->  System' ()
@@ -87,10 +88,10 @@ initialize pic = do
       )
   pure ()
 
-draw :: System' Picture
-draw = do
-  machines <-
-    foldDraw $ \(Machine, pos, Skin skin, Direction a, Velocity v) ->
+draw :: Env Game -> System' Picture
+draw = runReaderT $ do
+  machines <- lift . foldDraw $
+    \(Machine, pos, Skin skin, Direction a, Velocity v) ->
       translatePos pos
       $ mconcat
           [ scale' 0.1 $ G.rotate (-a*180/pi + 90) skin

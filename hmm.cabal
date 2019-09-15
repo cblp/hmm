@@ -43,7 +43,7 @@ library
     Game.World
     Game.Level
     Game.Image
-    Game.Sound
+    Game.Audio
     Game.FPS
     Game.Animation
     Game.TiledMap
