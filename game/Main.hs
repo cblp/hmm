@@ -5,7 +5,6 @@
 {-# LANGUAGE MultiWayIf            #-}
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE PatternSynonyms       #-}
-{-# LANGUAGE RecordWildCards       #-}
 {-# LANGUAGE TypeFamilies          #-}
 
 -- import System.Random
@@ -94,7 +93,7 @@ draw = do
     foldDraw $ \(Machine, pos, Skin skin, Direction a, Velocity v) ->
       translatePos pos
       $ mconcat
-          [ scale' 0.1 $ G.rotate (-a*180/pi + 90) $ skin
+          [ scale' 0.1 $ G.rotate (-a*180/pi + 90) skin
           , scale' 100 $ color red $ line' $ angle a
           , color blue $ line' v
           ]
